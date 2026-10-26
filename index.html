@@ -355,28 +355,30 @@ function renderPanel() {
 function peopleTab(t) {
   const lead = leadOf(t);
   const ordered = [lead, ...t.people.filter((p) => p !== lead)];
-  return ordered.map((p) => {
+  return `<button class="btn dashed" data-action="add-person" style="margin-bottom:6px">+ Add person</button>` + ordered.map((p) => {
     const mgr = person(t, p.manager);
     return `<button class="item" data-action="edit-person" data-id="${p.id}">
       <span class="av">${esc(initials(p.name))}</span>
       <span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}${mgr ? ` · reports to ${esc(mgr.name)}` : p === lead ? " · team lead" : ""}</small></span>
       <span class="tag">${p.access}</span></button>`;
-  }).join("") + `<button class="btn dashed" data-action="add-person" style="margin-top:8px">+ Add person</button>`;
+  }).join("");
 }
 
 function rolesTab(t) {
-  return (t.roles.length ? t.roles.map((r) => `<button class="item" data-action="edit-role" data-id="${r.id}">
+  return `<button class="btn dashed" data-action="set-role" data-team="${t.id}" style="margin-bottom:6px">+ Turn on AI role</button>` +
+    (t.roles.length ? t.roles.map((r) => `<button class="item" data-action="edit-role" data-id="${r.id}">
       <span class="av ai">AI</span>
       <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span>
       <span class="tag line">${MODES[r.mode][0]}</span></button>`).join("")
-    : `<p class="muted">No AI roles on this team yet.</p>`) + `<button class="btn dashed" data-action="set-role" data-team="${t.id}" style="margin-top:8px">+ Turn on AI role</button>`;
+    : `<p class="muted">No AI roles on this team yet.</p>`);
 }
 
 function missionsTab(t) {
-  return (t.missions.length ? t.missions.map((m) => `<button class="item" data-action="edit-mission" data-id="${m.id}">
+  return `<button class="btn dashed" data-action="add-mission" style="margin-bottom:6px">+ Add mission</button>` +
+    (t.missions.length ? t.missions.map((m) => `<button class="item" data-action="edit-mission" data-id="${m.id}">
       <span class="tx"><b>${esc(m.title)}</b><small>Owner: ${esc(person(t, m.owner)?.name || "Nobody")} · ${m.progress}%</small><div class="bar"><i style="width:${m.progress}%"></i></div></span>
       <span class="tag ${m.status}">${STATUS[m.status]}</span></button>`).join("")
-    : `<p class="muted">No missions yet.</p>`) + `<button class="btn dashed" data-action="add-mission" style="margin-top:8px">+ Add mission</button>`;
+    : `<p class="muted">No missions yet.</p>`);
 }
 
 function accessTab(t) {
