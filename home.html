@@ -42,7 +42,7 @@
 .send { align-self: flex-end; width: 42px; height: 42px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 19px; font-weight: 800; flex: none; }
 .send:disabled { opacity: .35; cursor: default; }
 
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
 .card { border: 1.5px solid var(--line-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
 .card:hover { border-color: var(--accent); }
 .card.primary { border: 2px solid var(--accent); padding: 13.5px 15.5px; }
@@ -106,7 +106,6 @@ const esc = Shell.esc;
 const SUGGESTIONS = [
   { title: "Create a mission", text: "Turn a goal into actionable work.", primary: true },
   { title: "Create AI roles", text: "Build an AI teammate for a specific responsibility." },
-  { title: "Manage my team", text: "Organize people, AI roles, and ongoing work." },
 ];
 const REPLY = "Placeholder reply from Flownt. This is where the answer to your message would appear.";
 const PROJECTS = [1, 2, 3].map((n) => ({ id: `project-${n}`, title: `Project name ${n}` }));
