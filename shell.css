@@ -58,10 +58,8 @@ h1, h2, h3, p { margin: 0; }
 .nav.on i { border-color: var(--accent); }
 /* Utility bar */
 .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-.topbar { display: flex; align-items: center; gap: 14px; padding: 14px 32px; border-bottom: 1px solid var(--line-soft); }
+.topbar { display: flex; align-items: center; gap: 14px; padding: 12px 32px; border-bottom: 1px solid var(--line-soft); }
 .menu-btn { display: none; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; place-items: center; }
-.search { flex: 1; max-width: 460px; border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--bg); min-width: 0; }
-.search::placeholder { color: var(--muted); }
 .top-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .needs-btn { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--line); border-radius: 99px; padding: 8px 10px 8px 13px; font-weight: 600; white-space: nowrap; }
 .needs-btn:hover { border-color: var(--accent); }

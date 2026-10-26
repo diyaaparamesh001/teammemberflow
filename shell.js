@@ -22,12 +22,10 @@
       ${todo("Outcomes")}`;
     $("#topbar").innerHTML = `
       <button class="menu-btn" data-shell="menu" aria-label="Open menu">☰</button>
-      <input class="search" id="search" type="text" placeholder="Search..." aria-label="Search" autocomplete="off">
       <div class="top-right">
         <button class="needs-btn" data-shell="todo" data-what="Needs You"><i></i><span class="lbl">Needs You</span><b>3</b></button>
         <button class="me" aria-label="Your account" data-shell="todo" data-what="Your account"></button>
       </div>`;
-    $("#search").addEventListener("keydown", (e) => { if (e.key === "Enter") toast("Search isn't part of this prototype"); });
 
     document.addEventListener("click", (e) => {
       const el = e.target.closest("[data-shell]");
