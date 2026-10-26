@@ -45,9 +45,8 @@
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
 .card { border: 1.5px solid var(--line-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
 .card:hover { border-color: var(--accent); }
-.card.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.card.primary span { color: var(--accent-ink); opacity: .85; }
-.card.primary:hover { opacity: .92; }
+.card.primary { border: 2px solid var(--accent); padding: 13.5px 15.5px; }
+.card.primary b { color: var(--accent); }
 .card b { font-weight: 700; }
 .card span { color: var(--muted); font-size: 14px; }
 
