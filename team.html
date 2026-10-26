@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* My Team: your team (people and the AI roles they look after) | person profile panel.
+/* My Team: your team (people and the AI roles they look after), then AI Role Activity | person profile or activity detail panel.
    Shared tokens and shell live in shell.css. */
 .app.has-panel { grid-template-columns: 248px minmax(0, 1fr) 400px; }
 .content { padding-top: 6px; }
@@ -77,6 +77,35 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .act:last-child { border-bottom: 0; }
 .act small { color: var(--muted); font-size: 12px; }
 
+a.btn { text-decoration: none; }
+
+/* AI Role Activity section */
+.activity { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; scroll-margin-top: 12px; }
+.activity h3 { font-size: 16px; font-weight: 800; }
+.scope { color: var(--muted); font-size: 14px; margin-top: -6px; }
+.filters { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1.5px solid var(--line-soft); }
+.filter { padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
+.filter.on { color: var(--accent); font-weight: 800; border-color: var(--accent); }
+.filter .n { font-size: 12px; background: var(--chip); color: var(--ink); border-radius: 99px; padding: 1px 7px; margin-left: 5px; font-weight: 700; }
+.role { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; white-space: nowrap; }
+.role i { width: 22px; height: 22px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); border: 1.5px dashed var(--accent); display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 9px; flex: none; }
+td.when { color: var(--muted); white-space: nowrap; }
+.status { display: inline-flex; align-items: center; gap: 6px; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.status.progress { color: var(--accent); background: var(--accent-soft); }
+.status.input { color: var(--warn); background: var(--warn-bg); }
+.status.done { color: var(--good); background: var(--good-bg); }
+.empty { padding: 18px 16px; color: var(--muted); font-size: 14px; }
+.p-head.top { align-items: flex-start; }
+.p-head.top h2 { margin-bottom: 4px; }
+.output { background: var(--sunk); border: 1.5px solid var(--line-soft); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.steps { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.steps li::before { content: "✓"; width: 20px; height: 20px; border-radius: 50%; background: var(--good-bg); color: var(--good); display: grid; place-items: center; font-size: 11px; font-weight: 800; flex: none; }
+.input-box { border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.input-box.yes { background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+.input-box.no { background: var(--sunk); color: var(--muted); }
+
 
 /* Responsive */
 @media (max-width: 1180px) {
@@ -100,6 +129,9 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   tr.click:hover td, tr.sel td { background: none; }
   tr.sel { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
   tr.sel td:first-child { box-shadow: none; }
+  .filters { flex-wrap: nowrap; overflow-x: auto; }
+  .act-table td.chev { grid-row: 1 / span 5; }
+  .act-table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); }
 }
 </style>
 </head>
@@ -154,6 +186,8 @@ const S = {
   ],
   selected: "team-a",
   person: null,
+  activity: null,
+  filter: "all",
   showAll: false,
 };
 
@@ -169,6 +203,21 @@ const rolesOf = (t, pid) => t.roles.filter((r) => r.owner === pid);
 const label = (t, p) => `${p.name} ${t.people.indexOf(p) + 1}${p.title ? " · " + p.title : ""}`;
 const TEAM_ROLE = { Admin: "Team Lead", Captain: "Team Captain", Member: "Team Member" };
 
+// AI Role Activity: activity from every mission the person's AI roles are involved in, newest first.
+const STATUS = { progress: "In progress", input: "Needs your input", done: "Completed" };
+const FILTERS = [["all", "All activity"], ["progress", "In progress"], ["input", "Needs your input"], ["done", "Completed"]];
+const M1 = "Research competitors for the product launch", M2 = "Mission title 2", M3 = "Mission title 3";
+const steps = (n) => Array.from({ length: n }, () => "Step completed goes here.");
+const ACTIVITY = [
+  { id: "a1", role: "Research Analyst", mission: M1, activity: "Analysing competitor pricing and features", status: "progress", updated: "5 minutes ago", output: "Output goes here.", done: steps(2), question: "" },
+  { id: "a2", role: "Data Analyst", mission: M2, activity: "Needs clarification on sales data", status: "input", updated: "12 minutes ago", output: "Output goes here.", done: steps(1), question: "Needs clarification on sales data" },
+  { id: "a3", role: "Content Writer", mission: M3, activity: "Activity description goes here.", status: "progress", updated: "30 minutes ago", output: "Output goes here.", done: steps(2), question: "" },
+  { id: "a4", role: "Content Writer", mission: M1, activity: "Drafted the campaign brief", status: "done", updated: "1 hour ago", output: "Output goes here.", done: steps(3), question: "" },
+  { id: "a5", role: "Research Analyst", mission: M2, activity: "Activity description goes here.", status: "done", updated: "2 hours ago", output: "Output goes here.", done: steps(3), question: "" },
+  { id: "a6", role: "Data Analyst", mission: M3, activity: "Activity description goes here.", status: "input", updated: "3 hours ago", output: "Output goes here.", done: steps(1), question: "Question for you goes here." },
+];
+const statusTag = (st) => `<span class="status ${st}">${STATUS[st]}</span>`;
+
 /* ---------- Render ---------- */
 function render() {
   $("#content").innerHTML = `
@@ -177,8 +226,10 @@ function render() {
       <div class="stat"><span>My Active Missions</span><b>4</b><small>Missions you're involved in</small></div>
       <div class="stat"><span>AI Roles I Look After</span><b>2</b><small>Roles you're responsible for</small></div>
     </div>
-    <div class="detail" id="detail"></div>`;
+    <div class="detail" id="detail"></div>
+    <section class="activity" id="activity" aria-label="AI Role Activity"></section>`;
   renderDetail();
+  renderActivity();
   renderPanel();
 }
 
@@ -208,10 +259,43 @@ function renderDetail() {
       <button class="link" data-action="toggle-all">${S.showAll ? "Show fewer" : "Show all"}</button></p>` : ""}`;
 }
 
+function renderActivity() {
+  const rows = ACTIVITY.filter((a) => S.filter === "all" || a.status === S.filter);
+  $("#activity").innerHTML = `
+    <h3>AI Role Activity</h3>
+    <p class="scope">Your ${new Set(ACTIVITY.map((a) => a.role)).size} AI roles across ${new Set(ACTIVITY.map((a) => a.mission)).size} missions</p>
+    <div class="filters" role="tablist">${FILTERS.map(([k, l]) => {
+      const n = k === "all" ? ACTIVITY.length : ACTIVITY.filter((a) => a.status === k).length;
+      return `<button class="filter ${S.filter === k ? "on" : ""}" role="tab" aria-selected="${S.filter === k}" data-action="filter" data-k="${k}">${l}<span class="n">${n}</span></button>`;
+    }).join("")}</div>
+    <div class="tw"><table class="act-table">
+      <thead><tr><th>AI role</th><th>Mission</th><th>Current activity</th><th>Status</th><th>Last updated</th><th class="chev"></th></tr></thead>
+      <tbody>${rows.map((a) => `<tr class="click ${S.activity === a.id ? "sel" : ""}" tabindex="0" data-action="activity" data-id="${a.id}" aria-label="Open ${esc(a.role)} activity">
+        <td><span class="role"><i>AI</i>${esc(a.role)}</span></td>
+        <td data-label="Mission">${esc(a.mission)}</td>
+        <td data-label="Current activity">${esc(a.activity)}</td>
+        <td>${statusTag(a.status)}</td>
+        <td class="when" data-label="Last updated">${esc(a.updated)}</td>
+        <td class="chev" aria-hidden="true">›</td></tr>`).join("")}</tbody></table>
+      ${rows.length ? "" : `<p class="empty">No activity here right now.</p>`}</div>`;
+}
+
 function renderPanel() {
-  const t = team(S.selected), p = S.person && person(t, S.person), panel = $("#panel");
-  $("#app").classList.toggle("has-panel", !!p);
-  panel.hidden = !p;
+  const t = team(S.selected), p = S.person && person(t, S.person), a = S.activity && ACTIVITY.find((x) => x.id === S.activity), panel = $("#panel");
+  $("#app").classList.toggle("has-panel", !!(p || a));
+  panel.hidden = !(p || a);
+  if (a) {
+    panel.innerHTML = `
+      <div class="p-head top"><div><h2>${esc(a.role)}</h2>${statusTag(a.status)}</div><button class="x" data-action="close" aria-label="Close">✕</button></div>
+      <div class="sec"><div>
+        <div class="kv"><span>Mission</span><span>${esc(a.mission)}</span></div>
+        <div class="kv"><span>Current activity</span><span>${esc(a.activity)}</span></div>
+        <div class="kv"><span>Last updated</span><span>${esc(a.updated)}</span></div></div></div>
+      <div class="sec"><h3>Output</h3><div class="output">${esc(a.output)}</div></div>
+      <div class="sec"><h3>What it has done so far</h3><ul class="steps">${a.done.map((d) => `<li>${esc(d)}</li>`).join("")}</ul></div>
+      <div class="sec"><h3>Needs human input</h3>${a.question ? `<div class="input-box yes">Yes · ${esc(a.question)}</div>` : `<div class="input-box no">No input needed</div>`}</div>`;
+    return;
+  }
   if (!p) return;
   const roles = rolesOf(t, p.id);
   const active = t.missionList.filter((m) => m.subs.some((sub) => sub.people.includes(p.id)));
@@ -231,13 +315,18 @@ function renderPanel() {
 }
 
 /* ---------- Events ---------- */
+function closePanel() { S.person = null; S.activity = null; renderDetail(); renderActivity(); renderPanel(); }
+
 document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
   if (!el) return;
   const { action: a, id: tid } = el.dataset;
   switch (a) {
-    case "person": S.person = tid; renderDetail(); renderPanel(); break;
-    case "close": S.person = null; renderDetail(); renderPanel(); break;
+    case "person": S.person = tid; S.activity = null; renderDetail(); renderActivity(); renderPanel(); break;
+    case "activity": S.activity = tid; S.person = null; renderDetail(); renderActivity(); renderPanel(); break;
+    case "close": closePanel(); break;
+    case "filter": S.filter = el.dataset.k; renderActivity(); break;
+    case "to-activity": e.preventDefault(); $("#activity").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); break;
     case "toggle-all": S.showAll = !S.showAll; renderDetail(); break;
   }
 });
@@ -246,12 +335,13 @@ document.addEventListener("keydown", (e) => {
   const row = e.target.closest?.("tr.click");
   if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); row.click(); }
   if (e.key === "Escape") {
-    if (S.person) { S.person = null; renderDetail(); renderPanel(); }
+    if (S.person || S.activity) closePanel();
   }
 });
 
-Shell.mount("team", { title: "My Team", needs: false, action: `<a class="btn primary" href="activity.html">AI Role Activity</a>` });
+Shell.mount("team", { title: "My Team", needs: false, action: `<a class="btn primary" href="#activity" data-action="to-activity">AI Role Activity</a>` });
 render();
+if (location.hash === "#activity") $("#activity").scrollIntoView();
 </script>
 </body>
 </html>

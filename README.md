@@ -10,9 +10,8 @@ down to phone.
 | --- | --- |
 | `index.html` | **Log in** (the first page): Welcome to Flownt, continue with a work email, Google Workspace or Microsoft. Each opens Home. |
 | `home.html` | **Home**: a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
-| `team.html` | **My Team**: a team list on the left; the selected team shows its mission and its people with the AI roles each one looks after. Clicking a person opens their access. |
+| `team.html` | **My Team** (team member view): your Needs You, active missions and AI roles counts; your team and its people with the AI roles each one looks after (clicking a person shows a read-only profile); then **AI Role Activity**, showing what your AI roles are doing across all their missions with status filters. The AI Role Activity button in the top bar scrolls to it. |
 | `workforce.html` | **AI Workforce**: total and active workflow counts, Create AI role, and a table of AI roles (role, purpose, owner, team, status) with team and status filters. Clicking a role shows its instructions, tools, owner, teams and missions. |
-| `activity.html` | **AI Role Activity** (from My Team): filters for all activity, in progress, needs your input and completed; a feed of what the AI roles are doing; clicking an item shows its output, what it has done so far and whether it needs human input. |
 | `shell.css`, `shell.js` | Shared colours, main nav sidebar and top bar (Needs You, account). |
 
 Missions and Outcomes aren't built yet.
