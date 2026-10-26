@@ -1,23 +1,19 @@
 # Flownt
 
-A clickable prototype of Flownt's **My Teams** page for an organization
-owner, using placeholder text throughout ("Team A", "Person name", "Title").
+A clickable prototype of Flownt, using placeholder text throughout.
+Static HTML, CSS and JavaScript with no build step, responsive from desktop
+down to phone.
 
-It's a single static page (`index.html`, no build step) and is responsive:
-a sidebar, team list and side sheet on desktop; the side sheet slides over
-on tablets; the sidebar collapses and rows stack on phones.
+## Pages
 
-## What you can do
+| File | Page |
+| --- | --- |
+| `index.html` | **Chat** (home): message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. Projects and recent chats in the sidebar open their own views. |
+| `team.html` | **My Team**: teams list with a side sheet for People, AI roles, Missions and Access. |
+| `shell.css`, `shell.js` | Shared colours, sidebar (main nav with chat history) and top bar (search, Needs You, account). |
 
-- Click a team row to open its side sheet with four tabs:
-  - **People**: who's on the team and who they report to. Add, edit or remove people.
-  - **AI roles**: which AI roles the team uses, how each takes part
-    (suggests, acts with approval, acts on its own) and who is accountable.
-  - **Missions**: the team's work, with owner, progress and status.
-  - **Access**: Admin, Manager and Member levels, and each person's level.
-- **+ Create Team** and **Set up AI role** from the top of the page.
-
-Changes live in the page only and reset on reload.
+Home, AI Workforce, Missions and Outcomes aren't built yet.
+New chats are kept while the tab is open; everything else resets on reload.
 
 ## Run locally
 
