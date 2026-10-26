@@ -91,12 +91,6 @@ select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5p
 .modal .intro { color: var(--muted); font-size: 14px; }
 .modal label.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
 .modal input[type=text], .modal select { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; width: 100%; }
-.choice { display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; cursor: pointer; font-weight: 400; }
-.choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
-.choice input { accent-color: var(--accent); }
-.choice input { margin-top: 3px; }
-.choice b { display: block; font-size: 14px; }
-.choice small { color: var(--muted); font-size: 13px; }
 .modal .err { color: var(--bad); font-weight: 600; font-size: 13px; }
 .modal .foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 .modal .foot .left { margin-right: auto; }
@@ -150,16 +144,11 @@ const ACCESS = {
   Manager: "Manages their reports and approves AI role work.",
   Member: "Works on missions and uses the team's AI roles.",
 };
-const MODES = {
-  suggest: ["Suggests", "Drafts work for a person to review."],
-  approval: ["Acts with approval", "Does the work once a person approves it."],
-  auto: ["Acts on its own", "Does the work and reports back."],
-};
 const STATUS = { good: "On track", warn: "At risk", bad: "Blocked" };
 
 let uid = 1;
 const id = () => "x" + uid++;
-function makeTeam(letter, size, roles, missions) {
+function makeTeam(letter, size, roleCount, missions) {
   const people = [];
   const lead = { id: id(), name: "Person name", title: "Title", manager: null, access: "Admin" };
   people.push(lead);
@@ -172,15 +161,15 @@ function makeTeam(letter, size, roles, missions) {
   }
   return {
     id: "team-" + letter.toLowerCase(), name: "Team " + letter, people, lead: lead.id,
-    roles: roles.map((mode, i) => ({ id: id(), name: "AI role " + (i + 1), mode, owner: people[(i + 1) % people.length].id })),
+    roles: Array.from({ length: roleCount }, (_, i) => ({ id: id(), name: "AI role " + (i + 1), owner: people[(i + 1) % people.length].id })),
     missions: missions.map((status, i) => ({ id: id(), title: "Mission title", status, owner: people[i % people.length].id, progress: [60, 35, 20, 80][i % 4] })),
   };
 }
 const S = {
   teams: [
-    makeTeam("A", 12, ["approval", "auto", "suggest"], ["good", "good", "warn", "bad"]),
-    makeTeam("B", 6, ["suggest", "approval"], ["good", "good", "warn"]),
-    makeTeam("C", 8, ["suggest", "auto"], ["good", "warn", "bad"]),
+    makeTeam("A", 12, 3, ["good", "good", "warn", "bad"]),
+    makeTeam("B", 6, 2, ["good", "good", "warn"]),
+    makeTeam("C", 8, 2, ["good", "warn", "bad"]),
   ],
   selected: matchMedia("(min-width: 1181px)").matches ? "team-a" : null,
   tab: "people",
@@ -266,8 +255,7 @@ function rolesTab(t) {
   return `<button class="btn dashed" data-action="set-role" data-team="${t.id}" style="margin-bottom:6px">+ Turn on AI role</button>` +
     (t.roles.length ? t.roles.map((r) => `<button class="item" data-action="edit-role" data-id="${r.id}">
       <span class="av ai">AI</span>
-      <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span>
-      <span class="tag line">${MODES[r.mode][0]}</span></button>`).join("")
+      <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span></button>`).join("")
     : `<p class="muted">No AI roles on this team yet.</p>`);
 }
 
@@ -307,8 +295,6 @@ function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
 }
 const closeModal = () => ($("#modal-root").innerHTML = "");
 const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${Object.keys(ACCESS).map((l) => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("")}</select>`;
-const modeChoices = (sel = "suggest") => Object.entries(MODES).map(([k, [l, d]]) =>
-  `<label class="choice"><input type="radio" name="mode" value="${k}" ${k === sel ? "checked" : ""}><span><b>${l}</b><small>${d}</small></span></label>`).join("");
 
 function createTeam() {
   const next = "Team " + String.fromCharCode(65 + S.teams.length);
@@ -364,14 +350,13 @@ function editPerson(pid) {
 function setRole(teamId) {
   const t = team(teamId || S.selected) || S.teams[0];
   modal({
-    title: "Set up AI role", submit: "Turn on", intro: "Choose a team, then decide how the AI role takes part in the work.",
+    title: "Set up AI role", submit: "Turn on", intro: "Choose a team and who is accountable for the AI role.",
     fields: `<label class="f">Team<select id="m-rteam" name="team" data-action="role-team">${S.teams.map((x) => `<option value="${x.id}" ${x === t ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
       <label class="f">AI role name<input id="m-rname" name="name" type="text" value="AI role ${t.roles.length + 1}"></label>
-      <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px">How it takes part${modeChoices()}</div>
       <label class="f">Accountable person<select id="m-rowner" name="owner">${peopleOptions(t, t.lead)}</select></label>`,
     onSubmit: (d) => {
       const tt = team(d.team);
-      tt.roles.push({ id: id(), name: d.name.trim() || "AI role", mode: d.mode, owner: d.owner });
+      tt.roles.push({ id: id(), name: d.name.trim() || "AI role", owner: d.owner });
       S.selected = tt.id; S.tab = "roles"; toast("AI role turned on");
     },
   });
@@ -381,10 +366,10 @@ function editRole(rid) {
   const t = team(S.selected), r = t.roles.find((x) => x.id === rid);
   modal({
     title: r.name, submit: "Save",
-    fields: `<div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px">How it takes part${modeChoices(r.mode)}</div>
+    fields: `<label class="f">AI role name<input id="m-ername" name="name" type="text" value="${esc(r.name)}"></label>
       <label class="f">Accountable person<select id="m-eowner" name="owner">${peopleOptions(t, r.owner)}</select></label>`,
     extra: `<button type="button" class="btn danger left" data-action="remove-role" data-id="${rid}">Turn off</button>`,
-    onSubmit: (d) => { r.mode = d.mode; r.owner = d.owner; toast("Saved"); },
+    onSubmit: (d) => { r.name = d.name.trim() || r.name; r.owner = d.owner; toast("Saved"); },
   });
 }
 
