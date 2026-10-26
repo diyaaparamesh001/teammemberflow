@@ -58,7 +58,7 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .p-head .x { margin-left: auto; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; display: grid; place-items: center; }
 .p-sum { display: flex; gap: 10px; padding: 16px 22px 0; }
 .p-stat { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.p-stat:hover { border-color: var(--accent); }
+button.p-stat:hover { border-color: var(--accent); }
 .p-stat:first-child { flex: none; width: 96px; }
 .p-stat:last-child { flex: 1; }
 .p-stat > span:first-child { font-size: 12px; font-weight: 600; color: var(--muted); }
@@ -72,8 +72,6 @@ button.item:hover { background: var(--sunk); }
 .item .tx { flex: 1; min-width: 0; }
 .item .tx b { display: block; font-weight: 700; }
 .item .tx small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar { height: 6px; background: var(--chip); border-radius: 99px; overflow: hidden; margin-top: 6px; }
-.bar i { display: block; height: 100%; background: var(--accent); }
 .sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
 .sum div { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; }
 .sum span { display: block; font-size: 12px; color: var(--muted); }
@@ -147,7 +145,6 @@ const ACCESS = {
   Captain: "Leads their reports and approves AI role work.",
   Member: "Works on missions and uses the team's AI roles.",
 };
-const STATUS = { good: "On track", warn: "At risk", bad: "Blocked" };
 
 let uid = 1;
 const id = () => "x" + uid++;
@@ -229,17 +226,17 @@ function renderPanel() {
   $("#app").classList.toggle("has-panel", !!t);
   panel.hidden = !t;
   if (!t) return;
-  const tabs = [["people", "People"], ["roles", "AI roles"], ["missions", "Missions"], ["access", "Access"]];
+  const tabs = [["people", "People"], ["roles", "AI roles"], ["access", "Access"]];
   panel.innerHTML = `
     <div class="p-head"><span class="av lg">${esc(t.name.replace(/^Team\s+/, "").slice(0, 2).toUpperCase())}</span>
       <div><h2>${esc(t.name)}</h2><small>Led by ${esc(leadOf(t).name)} · ${plural(t.people.length, "member")}</small></div>
       <button class="x" data-action="close" aria-label="Close">✕</button></div>
     <div class="p-sum">
       <button class="p-stat" data-action="tab" data-k="roles"><span>AI roles</span><b>${t.roles.length}</b></button>
-      <button class="p-stat" data-action="tab" data-k="missions"><span>Mission health</span><span class="tags">${health(t)}</span></button>
+      <div class="p-stat"><span>Mission health</span><span class="tags">${health(t)}</span></div>
     </div>
     <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${S.tab === k ? "on" : ""}" role="tab" aria-selected="${S.tab === k}" data-action="tab" data-k="${k}">${l}</button>`).join("")}</div>
-    <div class="p-body">${({ people: peopleTab, roles: rolesTab, missions: missionsTab, access: accessTab })[S.tab](t)}</div>`;
+    <div class="p-body">${({ people: peopleTab, roles: rolesTab, access: accessTab })[S.tab](t)}</div>`;
 }
 
 function peopleTab(t) {
@@ -260,14 +257,6 @@ function rolesTab(t) {
       <span class="av ai">AI</span>
       <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span></button>`).join("")
     : `<p class="muted">No AI roles on this team yet.</p>`);
-}
-
-function missionsTab(t) {
-  return `<button class="btn dashed" data-action="add-mission" style="margin-bottom:6px">+ Add mission</button>` +
-    (t.missions.length ? t.missions.map((m) => `<button class="item" data-action="edit-mission" data-id="${m.id}">
-      <span class="tx"><b>${esc(m.title)}</b><small>Owner: ${esc(person(t, m.owner)?.name || "Nobody")} · ${m.progress}%</small><div class="bar"><i style="width:${m.progress}%"></i></div></span>
-      <span class="tag ${m.status}">${STATUS[m.status]}</span></button>`).join("")
-    : `<p class="muted">No missions yet.</p>`);
 }
 
 function accessTab(t) {
@@ -304,7 +293,7 @@ const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${
 function createTeam() {
   const next = "Team " + String.fromCharCode(65 + S.teams.length);
   modal({
-    title: "Create team", submit: "Create team", intro: "You can add people, AI roles and missions after it's created.",
+    title: "Create team", submit: "Create team", intro: "You can add people and AI roles after it's created.",
     fields: `<label class="f">Team name<input id="m-tname" name="name" type="text" value="${next}"></label>
       <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>`,
     onSubmit: (d) => {
@@ -378,21 +367,6 @@ function editRole(rid) {
   });
 }
 
-function editMission(mid) {
-  const t = team(S.selected), m = mid ? t.missions.find((x) => x.id === mid) : null;
-  modal({
-    title: m ? "Mission" : "Add mission", submit: m ? "Save" : "Add mission",
-    fields: `<label class="f">Mission title<input id="m-mtitle" name="title" type="text" value="${esc(m ? m.title : "Mission title")}"></label>
-      <label class="f">Owner<select id="m-mowner" name="owner">${peopleOptions(t, m ? m.owner : t.lead)}</select></label>
-      <label class="f">Status<select id="m-mstatus" name="status">${Object.entries(STATUS).map(([k, l]) => `<option value="${k}" ${(m ? m.status : "good") === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>`,
-    onSubmit: (d) => {
-      const vals = { title: d.title.trim() || "Mission title", owner: d.owner, status: d.status };
-      if (m) Object.assign(m, vals); else t.missions.push({ id: id(), progress: 0, ...vals });
-      toast(m ? "Saved" : "Mission added");
-    },
-  });
-}
-
 /* ---------- Events ---------- */
 document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
@@ -407,8 +381,6 @@ document.addEventListener("click", (e) => {
     case "edit-person": editPerson(tid); break;
     case "set-role": setRole(el.dataset.team); break;
     case "edit-role": editRole(tid); break;
-    case "add-mission": editMission(); break;
-    case "edit-mission": editMission(tid); break;
     case "remove-person": {
       const t = team(S.selected), p = person(t, tid);
       t.people.filter((q) => q.manager === tid).forEach((q) => (q.manager = p.manager));
