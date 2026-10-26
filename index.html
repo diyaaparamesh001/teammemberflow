@@ -46,6 +46,9 @@
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
 .card { border: 1.5px solid var(--line-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
 .card:hover { border-color: var(--accent); }
+.card.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.card.primary span { color: var(--accent-ink); opacity: .85; }
+.card.primary:hover { opacity: .92; }
 .card b { font-weight: 700; }
 .card span { color: var(--muted); font-size: 14px; }
 
@@ -105,8 +108,8 @@
 const $ = (s) => document.querySelector(s);
 const esc = Shell.esc;
 const SUGGESTIONS = [
+  { title: "Create a mission", text: "Turn a goal into actionable work.", primary: true },
   { title: "Create AI roles", text: "Build an AI teammate for a specific responsibility." },
-  { title: "Create a mission", text: "Turn a goal into actionable work." },
   { title: "Manage my team", text: "Organize people, AI roles, and ongoing work." },
 ];
 const REPLY = "Placeholder reply from Flownt. This is where the answer to your message would appear.";
@@ -164,7 +167,7 @@ function render() {
     $("#chat-title").textContent = "Chat";
     area.innerHTML = `<div class="chat start">
       ${composer("Message Flownt...")}
-      <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
+      <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card ${s.primary ? "primary" : ""}" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
   }
   renderHistory();
   wire(chat, project);
