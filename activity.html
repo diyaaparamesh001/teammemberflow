@@ -14,6 +14,7 @@
 .content { padding-top: 6px; }
 .muted { color: var(--muted); }
 
+.scope { color: var(--muted); font-size: 15px; margin-bottom: 10px; }
 .filters { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1.5px solid var(--line-soft); margin-bottom: 16px; }
 .filter { padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
 .filter.on { color: var(--accent); font-weight: 800; border-color: var(--accent); }
@@ -97,13 +98,16 @@ td.when { color: var(--muted); white-space: nowrap; }
 <script>
 const STATUS = { progress: "In progress", input: "Needs your input", done: "Completed" };
 const FILTERS = [["all", "All activity"], ["progress", "In progress"], ["input", "Needs your input"], ["done", "Completed"]];
+// Activity from every mission the person's AI roles are involved in, newest first.
+const M1 = "Research competitors for the product launch", M2 = "Mission title 2", M3 = "Mission title 3";
+const steps = (n) => Array.from({ length: n }, () => "Step completed goes here.");
 const ACTIVITY = [
-  { id: "a1", role: "Research Analyst", mission: "Research competitors for the product launch", activity: "Analysing competitor pricing and features", status: "progress", updated: "5 minutes ago",
-    output: "Output goes here.", done: ["Step completed goes here.", "Step completed goes here."], question: "" },
-  { id: "a2", role: "Content Writer", mission: "Mission title", activity: "Drafted the campaign brief", status: "done", updated: "1 hour ago",
-    output: "Output goes here.", done: ["Step completed goes here.", "Step completed goes here.", "Step completed goes here."], question: "" },
-  { id: "a3", role: "Data Analyst", mission: "Mission title", activity: "Needs clarification on sales data", status: "input", updated: "12 minutes ago",
-    output: "Output goes here.", done: ["Step completed goes here."], question: "Needs clarification on sales data" },
+  { id: "a1", role: "Research Analyst", mission: M1, activity: "Analysing competitor pricing and features", status: "progress", updated: "5 minutes ago", output: "Output goes here.", done: steps(2), question: "" },
+  { id: "a2", role: "Data Analyst", mission: M2, activity: "Needs clarification on sales data", status: "input", updated: "12 minutes ago", output: "Output goes here.", done: steps(1), question: "Needs clarification on sales data" },
+  { id: "a3", role: "Content Writer", mission: M3, activity: "Activity description goes here.", status: "progress", updated: "30 minutes ago", output: "Output goes here.", done: steps(2), question: "" },
+  { id: "a4", role: "Content Writer", mission: M1, activity: "Drafted the campaign brief", status: "done", updated: "1 hour ago", output: "Output goes here.", done: steps(3), question: "" },
+  { id: "a5", role: "Research Analyst", mission: M2, activity: "Activity description goes here.", status: "done", updated: "2 hours ago", output: "Output goes here.", done: steps(3), question: "" },
+  { id: "a6", role: "Data Analyst", mission: M3, activity: "Activity description goes here.", status: "input", updated: "3 hours ago", output: "Output goes here.", done: steps(1), question: "Question for you goes here." },
 ];
 const S = { filter: "all", open: null };
 const $ = (s) => document.querySelector(s);
@@ -112,6 +116,7 @@ const statusTag = (s) => `<span class="status ${s}">${STATUS[s]}</span>`;
 
 function render() {
   $("#content").innerHTML = `
+    <p class="scope">Your ${new Set(ACTIVITY.map((a) => a.role)).size} AI roles across ${new Set(ACTIVITY.map((a) => a.mission)).size} missions</p>
     <div class="filters" role="tablist">${FILTERS.map(([k, l]) => {
       const n = k === "all" ? ACTIVITY.length : ACTIVITY.filter((a) => a.status === k).length;
       return `<button class="filter ${S.filter === k ? "on" : ""}" role="tab" aria-selected="${S.filter === k}" data-action="filter" data-k="${k}">${l}<span class="n">${n}</span></button>`;
