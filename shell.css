@@ -60,6 +60,7 @@ h1, h2, h3, p { margin: 0; }
 .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 .topbar { display: flex; align-items: center; gap: 14px; padding: 12px 32px; }
 .menu-btn { display: none; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; place-items: center; }
+.top-title { font-size: 26px; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .top-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .needs-btn { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--line); border-radius: 99px; padding: 8px 10px 8px 13px; font-weight: 600; white-space: nowrap; }
 .needs-btn:hover { border-color: var(--accent); }
@@ -86,6 +87,7 @@ h1, h2, h3, p { margin: 0; }
   .sidebar.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.2); }
   .menu-btn { display: grid; }
   .topbar, .content { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .top-title { font-size: 20px; }
   .topbar { gap: 8px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
   .content { padding-top: 22px; }
   .needs-btn { padding: 7px 9px; }
