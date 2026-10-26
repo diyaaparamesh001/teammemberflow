@@ -1,20 +1,19 @@
 # Flownt
 
-A clickable prototype of Flownt's **My Team** page: who owns and oversees
-your AI organization.
+A clickable prototype of Flownt's **My Teams** page.
 
 It's a single static page (`index.html`, no build step) and is responsive:
-a three-column app on desktop, a slide-over profile panel on tablets, and a
-collapsible sidebar on phones.
+a sidebar app on desktop, a collapsible sidebar and stacked rows on phones.
 
 ## What you can do
 
-- Expand cards on the org chart (▸) and open a person's profile (click their name)
-- Add a person, assign or reassign AI roles, change reporting lines, edit or remove a person
-- Change AI role owners and statuses on the **AI role ownership** tab
-- Add teams on the **Organization setup** tab
-- Resolve items from **Needs You** and search with ⌘K / Ctrl+K
+- See every team with its lead and member count
+- Click a team to open its details: lead, members, roles and emails
+- **+ Create Team** adds a new team to the list
+- **+ Add member** and **Make lead** on a team's page
+- Search teams and people with ⌘K / Ctrl+K
 
+Each team has its own link (for example `#team-engineering`).
 Changes live in the page only and reset on reload.
 
 ## Run locally

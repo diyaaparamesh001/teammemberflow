@@ -3,48 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flownt My Teams</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1f'/%3E%3C/svg%3E">
-<title>Flownt My Team</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <style>
-/* Layout: app shell — sidebar | main (stats, tabs, org chart) | profile panel. Wireframe greys, ink as the only accent. */
+/* Layout: app shell — sidebar | main (teams list or one team's details). Wireframe greys, ink as the only accent. */
 :root {
   --bg: #ffffff;
   --side: #f4f4f6;
   --sunk: #f8f8fa;
   --chip: #e6e6ea;
   --line: #c4c4cb;
-  --line-soft: #dedee3;
+  --line-soft: #e2e2e7;
   --ink: #1a1a1f;
   --muted: #66666f;
   --scrim: rgba(20, 20, 26, .38);
   --font: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 10px;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #141417; --side: #1b1b1f; --sunk: #18181c; --chip: #2b2b31;
-    --line: #4a4a53; --line-soft: #34343b; --ink: #ededf0; --muted: #a0a0aa;
+    --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa;
     --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #141417; --side: #1b1b1f; --sunk: #18181c; --chip: #2b2b31;
-  --line: #4a4a53; --line-soft: #34343b; --ink: #ededf0; --muted: #a0a0aa;
+  --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa;
   --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
 }
 
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.link { font-weight: 800; text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
-.link:hover { opacity: .7; }
 
 .app { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 100%; }
-.app.has-panel { grid-template-columns: 260px minmax(0, 1fr) 420px; }
 
 /* Sidebar */
 .sidebar { background: var(--side); border-right: 1px solid var(--line-soft); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
@@ -54,13 +54,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .nav i { width: 20px; height: 20px; border: 1.5px solid var(--muted); border-radius: 5px; flex: none; }
 .nav:hover { background: var(--chip); }
 .nav.on { background: var(--chip); font-weight: 600; }
-.nav .count { margin-left: auto; font-size: 12px; font-weight: 800; background: var(--ink); color: var(--bg); border-radius: 99px; padding: 1px 7px; }
 
-/* Main column */
+/* Main */
 .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-.topbar { display: flex; align-items: center; gap: 16px; padding: 16px 36px; border-bottom: 1px solid var(--line-soft); }
+.topbar { display: flex; align-items: center; gap: 16px; padding: 16px 40px; border-bottom: 1px solid var(--line-soft); }
 .menu-btn { display: none; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; }
-.search { position: relative; flex: 1; max-width: 550px; }
+.search { position: relative; flex: 1; max-width: 520px; }
 .search input { width: 100%; border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 60px 11px 16px; background: var(--bg); }
 .search kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 600 12px var(--font); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: var(--muted); }
 .results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; z-index: 30; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
@@ -68,179 +67,100 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .results button:hover, .results button.hl { background: var(--chip); }
 .results small { color: var(--muted); }
 .results p { padding: 10px; color: var(--muted); margin: 0; }
-.top-right { margin-left: auto; display: flex; align-items: center; gap: 16px; position: relative; }
-.needs { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--line); border-radius: 99px; padding: 9px 12px 9px 16px; font-weight: 600; }
-.needs b { background: var(--ink); color: var(--bg); border-radius: 99px; min-width: 22px; height: 22px; display: grid; place-items: center; font-size: 12px; }
-.me { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); }
-.pop { position: absolute; right: 60px; top: calc(100% + 8px); width: 340px; max-width: calc(100vw - 32px); background: var(--bg); border: 1.5px solid var(--line); border-radius: var(--r); z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,.12); padding: 8px; }
-.pop h4 { margin: 6px 8px 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
-.pop-item { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; padding: 10px; border-radius: 8px; }
-.pop-item:hover { background: var(--sunk); }
-.pop-item span { font-size: 14px; }
-.pop-item small { display: block; color: var(--muted); font-size: 12px; }
-.pop-item .btn { flex: none; }
+.me { margin-left: auto; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--chip); font-weight: 800; font-size: 14px; flex: none; }
 
-.content { overflow-y: auto; padding: 32px 36px 48px; flex: 1; }
-h1 { font-size: 34px; font-weight: 800; margin: 0 0 6px; letter-spacing: -.01em; text-wrap: balance; }
-.lede { color: var(--muted); margin: 0 0 18px; font-size: 17px; max-width: 70ch; }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+.content { overflow-y: auto; padding: 36px 40px 56px; flex: 1; }
+.wrap { max-width: 960px; }
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+h1 { font-size: 32px; font-weight: 800; margin: 0 0 6px; letter-spacing: -.01em; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; font-size: 17px; }
 .btn { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 18px; font-weight: 600; background: var(--bg); white-space: nowrap; }
 .btn:hover { border-color: var(--ink); }
-.btn.fill { background: var(--chip); border-color: var(--chip); }
-.btn.fill:hover { border-color: var(--ink); }
-.btn.sm { padding: 7px 13px; font-size: 14px; }
-.btn.dashed { border-style: dashed; }
-.btn.block { width: 100%; padding: 13px; }
-.btn.danger { border-color: var(--ink); }
-.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.btn.primary:hover { opacity: .88; }
+.back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 600; margin-bottom: 18px; }
+.back:hover { color: var(--ink); }
 
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 26px; }
-.stat { border: 1.5px solid var(--line); border-radius: var(--r); padding: 14px 16px; text-align: left; background: var(--bg); }
-.stat:hover { border-color: var(--ink); }
-.stat h3 { margin: 0; font-size: 14px; font-weight: 600; }
-.stat strong { display: block; font-size: 26px; font-weight: 800; line-height: 1.3; font-variant-numeric: tabular-nums; }
-.stat span { color: var(--muted); font-size: 14px; }
+/* Lists */
+.list { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow: hidden; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+th { font-size: 13px; font-weight: 600; color: var(--muted); background: var(--sunk); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--sunk); }
+tr.click:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+tr.new td { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: var(--chip); } to { background: transparent; } }
+.team-name { font-weight: 800; font-size: 16px; }
+.muted { color: var(--muted); }
+.chev { color: var(--muted); text-align: right; width: 40px; }
+.person { display: flex; align-items: center; gap: 12px; }
+.av { width: 36px; height: 36px; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-weight: 800; font-size: 13px; flex: none; }
+.av.lg { width: 64px; height: 64px; border-radius: 16px; font-size: 22px; }
+.chip { display: inline-block; border: 1.5px solid var(--ink); border-radius: 5px; padding: 0 7px; font-weight: 800; font-size: 12px; margin-left: 8px; vertical-align: 1px; }
+.num { font-variant-numeric: tabular-nums; }
+.link { font-weight: 600; font-size: 14px; text-decoration: underline; text-underline-offset: 2px; color: var(--muted); }
+.link:hover { color: var(--ink); }
 
-.tabs { display: flex; gap: 6px; border-bottom: 1.5px solid var(--line-soft); margin-bottom: 18px; overflow-x: auto; }
-.tab { padding: 12px 20px; font-size: 17px; border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
-.tab.on { font-weight: 800; border-color: var(--ink); }
-
-.legend-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; color: var(--muted); font-size: 14px; margin-bottom: 18px; }
-.legend-row .push { margin-left: auto; display: flex; gap: 10px; }
-.st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
-.dot.idle { background: none; border: 1.5px solid currentColor; width: 9px; height: 9px; }
-.dot.paused { width: 9px; height: 9px; border-radius: 0; background: none; border-left: 3px solid currentColor; border-right: 3px solid currentColor; }
-
-/* Org chart */
-.canvas { background: var(--sunk); border: 1.5px solid var(--line-soft); border-radius: 14px; overflow: auto; padding: 40px 24px 60px; min-height: 520px; }
-.tree { width: max-content; margin: 0 auto; }
-.tree ul { display: flex; justify-content: center; padding: 32px 0 0; margin: 0; position: relative; }
-.tree > ul { padding-top: 0; }
-.tree li { list-style: none; position: relative; padding: 32px 11px 0; display: flex; flex-direction: column; align-items: center; }
-.tree li::before, .tree li::after { content: ""; position: absolute; top: 0; right: 50%; width: 50%; height: 32px; border-top: 1.5px solid var(--line); }
-.tree li::after { right: auto; left: 50%; border-left: 1.5px solid var(--line); }
-.tree li:only-child { padding-top: 0; }
-.tree li:only-child::before, .tree li:only-child::after { display: none; }
-.tree li:first-child::before, .tree li:last-child::after { border: 0; }
-.tree li:last-child::before { border-right: 1.5px solid var(--line); }
-.tree ul ul::before { content: ""; position: absolute; top: 0; left: 50%; height: 32px; border-left: 1.5px solid var(--line); }
-.tree li:only-child > ul { padding-top: 32px; }
-
-.card { width: 252px; background: var(--bg); border: 1.5px solid var(--line); border-radius: var(--r); text-align: left; position: relative; }
-.card.sel { box-shadow: 0 0 0 5px var(--chip), 0 0 0 6.5px var(--line); }
-.card-head { display: flex; align-items: stretch; }
-.who { display: flex; align-items: center; gap: 12px; padding: 12px 14px; flex: 1; min-width: 0; text-align: left; }
-.av { width: 40px; height: 40px; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-weight: 800; font-size: 14px; flex: none; }
-.av.lg { width: 56px; height: 56px; font-size: 18px; }
-.who b { display: block; font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.who:hover b { text-decoration: underline; text-underline-offset: 3px; }
-.who small { color: var(--muted); font-size: 13px; }
-.who > div { min-width: 0; }
-.tog { width: 56px; border-left: 1.5px solid var(--line); font-size: 12px; flex: none; border-radius: 0 var(--r) var(--r) 0; }
-.card.open .tog { background: var(--sunk); border-radius: 0 var(--r) 0 0; }
-.tog:hover { background: var(--chip); }
-.details { border-top: 1.5px dashed var(--line); padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-.details .row { display: flex; justify-content: space-between; gap: 8px; }
-.details .row .st { font-weight: 600; }
-.details .muted { color: var(--muted); }
-.chip { align-self: flex-start; border: 1.5px solid var(--ink); border-radius: 5px; padding: 1px 8px; font-weight: 800; font-size: 13px; }
-.chip.soft { border-color: var(--line); font-weight: 600; color: var(--muted); }
-.add-slot { width: 252px; margin-top: 22px; border: 1.5px dashed var(--line); border-radius: var(--r); padding: 14px; color: var(--muted); font-size: 15px; }
-.add-slot:hover { border-color: var(--ink); color: var(--ink); }
-
-/* Ownership table */
-.table-wrap { overflow-x: auto; border: 1.5px solid var(--line-soft); border-radius: var(--r); }
-table { border-collapse: collapse; width: 100%; min-width: 640px; }
-th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); font-size: 14px; vertical-align: middle; }
-th { font-weight: 600; color: var(--muted); background: var(--sunk); }
-tr:last-child td { border-bottom: 0; }
-td select { border: 1.5px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--bg); max-width: 200px; }
-tr.warn td { background: var(--sunk); }
-.no-owner { font-weight: 800; }
-
-/* Setup tab */
-.setup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.box { border: 1.5px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.box h3 { margin: 0; font-size: 16px; font-weight: 800; }
-.box .line { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
-.box .line:last-of-type { border-bottom: 0; }
-.box .line span:first-child { color: var(--muted); }
-.box label { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
-.box select, .box input[type=text] { border: 1.5px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--bg); }
+/* Team details */
+.team-head { display: flex; gap: 18px; align-items: center; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; }
+.fact { border: 1.5px solid var(--line-soft); border-radius: var(--r); padding: 14px 18px; }
+.fact span { display: block; font-size: 13px; color: var(--muted); }
+.fact b { font-size: 18px; font-weight: 800; }
+.sec-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.sec-head h2 { font-size: 18px; font-weight: 800; margin: 0; }
 
 .placeholder { border: 1.5px dashed var(--line); border-radius: 14px; padding: 60px 24px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .placeholder h2 { color: var(--ink); margin: 0; font-size: 22px; }
 
-/* Profile panel */
-.panel { border-left: 1px solid var(--line-soft); display: flex; flex-direction: column; min-width: 0; background: var(--bg); overflow: hidden; }
-.panel-body { overflow-y: auto; padding: 24px 24px 16px; flex: 1; display: flex; flex-direction: column; gap: 22px; }
-.p-head { display: flex; gap: 16px; align-items: center; }
-.p-head h2 { margin: 0; font-size: 21px; font-weight: 800; }
-.p-head small { color: var(--muted); font-size: 15px; }
-.p-head .x { margin-left: auto; align-self: flex-start; width: 44px; height: 44px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; }
-.sec { display: flex; flex-direction: column; gap: 8px; }
-.sec h3 { margin: 0; font-size: 15px; font-weight: 800; }
-.role { border: 1.5px dashed var(--line); border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
-.role .row { display: flex; justify-content: space-between; font-weight: 600; }
-.role .links { display: flex; gap: 16px; flex-wrap: wrap; }
-.sec p { margin: 0; color: var(--muted); }
-.sec p.ink { color: var(--ink); }
-.field { border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 14px; display: flex; gap: 8px; align-items: baseline; }
-.field span { color: var(--muted); }
-.field b { font-weight: 600; flex: 1; }
-.kv { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
-.kv span:first-child { color: var(--muted); }
-.kv span:last-child { text-align: right; }
-.panel-foot { border-top: 1px solid var(--line-soft); padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 12px; }
-.panel-foot p { margin: 0; text-align: center; color: var(--muted); font-size: 13px; }
-.confirm { border: 1.5px solid var(--ink); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
-.confirm select { border: 1.5px solid var(--line); border-radius: 6px; padding: 8px; background: var(--bg); width: 100%; }
-.confirm .two { display: flex; gap: 10px; }
-.confirm .two .btn { flex: 1; }
-
 /* Modal + toast */
 .scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 50; padding: 16px; }
-.modal { background: var(--bg); border-radius: 14px; width: 440px; max-width: 100%; padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
+.modal { background: var(--bg); border-radius: 14px; width: 440px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
 .modal h2 { margin: 0; font-size: 20px; font-weight: 800; }
 .modal p { margin: 0; color: var(--muted); font-size: 14px; }
 .modal label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
 .modal input, .modal select { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; }
-.modal .err { color: var(--ink); font-weight: 600; font-size: 13px; }
+.modal .err { font-weight: 600; font-size: 13px; }
 .modal .foot { display: flex; justify-content: flex-end; gap: 10px; }
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 8px; font-weight: 600; z-index: 60; max-width: calc(100vw - 32px); }
 
 /* Responsive */
-@media (max-width: 1180px) {
-  .app.has-panel { grid-template-columns: 260px minmax(0, 1fr); }
-  .panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 40; box-shadow: -10px 0 40px rgba(0,0,0,.18);
-    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
-}
 @media (max-width: 820px) {
-  .app, .app.has-panel { grid-template-columns: minmax(0, 1fr); }
+  .app { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; z-index: 45; transform: translateX(-100%); transition: transform .2s;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-top: calc(24px + env(safe-area-inset-top, 0px)); }
   .sidebar.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.18); }
   .menu-btn { display: grid; place-items: center; }
   .topbar, .content { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .topbar { gap: 10px; }
-  .needs { padding: 8px 10px; }
-  .needs .lbl { display: none; }
-  .me { width: 38px; height: 38px; }
+  .topbar { gap: 10px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; }
+  .content { padding-top: 24px; }
   .search kbd { display: none; }
   .search input { padding-right: 14px; }
-  .pop { right: 0; }
-  .stats { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .setup { grid-template-columns: minmax(0, 1fr); }
-  h1 { font-size: 28px; }
-  .legend-row .push { margin-left: 0; }
+  .me { width: 40px; height: 40px; }
+  h1 { font-size: 26px; }
+  .head .btn { width: 100%; }
+  .facts { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .av.lg { width: 52px; height: 52px; font-size: 18px; }
+
+  /* Tables become stacked rows */
+  thead { display: none; }
+  table, tbody, tr, td { display: block; }
+  tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
+  tbody tr:last-child { border-bottom: 0; }
+  td { padding: 0; border: 0; grid-column: 1; min-width: 0; }
+  td.chev, td.side { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+  tr.click:hover { background: var(--sunk); }
+  tr.click:hover td { background: none; }
+  td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); }
+  td.email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
-<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><i></i>Flownt</div>
     <nav id="nav"></nav>
@@ -250,278 +170,132 @@ tr.warn td { background: var(--sunk); }
     <header class="topbar">
       <button class="menu-btn" data-action="menu" aria-label="Open menu">☰</button>
       <div class="search">
-        <input id="q" type="text" placeholder="Search or jump to..." autocomplete="off" aria-label="Search people and AI roles">
+        <input id="q" type="text" placeholder="Search teams and people..." autocomplete="off" aria-label="Search teams and people">
         <kbd>⌘K</kbd>
         <div class="results" id="results" hidden></div>
       </div>
-      <div class="top-right">
-        <button class="needs" data-action="needs" aria-haspopup="true"><span class="lbl">Needs You</span> <b id="needs-count">0</b></button>
-        <button class="me" aria-label="Your account" data-action="todo" data-what="Your account"></button>
-        <div class="pop" id="needs-pop" hidden></div>
-      </div>
+      <button class="me" aria-label="Your account" data-action="todo" data-what="Your account">YU</button>
     </header>
     <main class="content" id="content"></main>
   </div>
-
-  <aside class="panel" id="panel" hidden></aside>
 </div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
+const m = (name, role) => ({ id: "u" + Math.random().toString(36).slice(2, 9), name, role });
 const S = {
-  nav: "team",
-  tab: "org",
-  selected: matchMedia("(min-width: 1181px)").matches ? "b" : null,
-  expanded: new Set(["b"]),
-  confirmRemove: false,
-  people: [
-    { id: "a", name: "Person A", title: "Title", team: "Company", manager: null, approves: "Unlimited" },
-    { id: "b", name: "Person B", title: "Title", team: "Team 1", manager: "a", approves: "Up to $X" },
-    { id: "c", name: "Person C", title: "Title", team: "Team 2", manager: "a", approves: "Up to $X" },
-    { id: "d", name: "Person D", title: "Title", team: "Team 1", manager: "b", approves: "Up to $Y" },
-    { id: "e", name: "Person E", title: "Title", team: "Team 1", manager: "b", approves: "Up to $Y" },
+  nav: "teams",
+  justCreated: null,
+  teams: [
+    { id: "engineering", name: "Engineering", about: "Builds and runs the Flownt platform.", created: "Mar 2023", members: [
+      m("Sarah Lee", "Engineering Manager"), m("David Chen", "Staff Engineer"), m("Priya Nair", "Senior Frontend Engineer"),
+      m("Marcus Johnson", "Backend Engineer"), m("Elena Rossi", "Backend Engineer"), m("Tom Becker", "DevOps Engineer"),
+      m("Aisha Rahman", "Frontend Engineer"), m("Kenji Tanaka", "Mobile Engineer"), m("Lucas Silva", "QA Engineer"),
+      m("Nora Fischer", "Data Engineer"), m("Omar Haddad", "Software Engineer"), m("Grace Park", "Software Engineer"),
+    ] },
+    { id: "product-design", name: "Product Design", about: "Designs how Flownt looks, feels and works.", created: "Jun 2023", members: [
+      m("Arjun Kumar", "Design Lead"), m("Chloe Martin", "Senior Product Designer"), m("Diego Alvarez", "Product Designer"),
+      m("Hannah Wright", "UX Researcher"), m("Ravi Patel", "Visual Designer"), m("Zoe Kim", "Content Designer"),
+    ] },
+    { id: "marketing", name: "Marketing", about: "Tells the world about Flownt and grows its audience.", created: "Sep 2023", members: [
+      m("Maya Thomas", "Marketing Lead"), m("Ben Carter", "Growth Marketer"), m("Fatima Ali", "Content Strategist"),
+      m("Liam O'Brien", "SEO Specialist"), m("Sofia Garcia", "Social Media Manager"), m("Jack Wilson", "Product Marketing Manager"),
+      m("Mei Lin", "Brand Designer"), m("Noah Brooks", "Marketing Analyst"),
+    ] },
   ],
-  roles: [
-    { id: "r1", name: "AI role 1", status: "active", owner: "b" },
-    { id: "r2", name: "AI role 2", status: "active", owner: "b" },
-    { id: "r3", name: "AI role 3", status: "idle", owner: "c" },
-    { id: "r4", name: "AI role 4", status: "active", owner: "d" },
-    { id: "r5", name: "AI role 5", status: "paused", owner: "e" },
-    { id: "r6", name: "AI role 6", status: "idle", owner: null },
-  ],
-  missions: [
-    { id: "m1", title: "Mission title", owner: "b", blocked: false },
-    { id: "m2", title: "Mission title", owner: "b", blocked: true },
-    { id: "m3", title: "Mission title", owner: "a", blocked: false },
-    { id: "m4", title: "Mission title", owner: "c", blocked: false },
-    { id: "m5", title: "Mission title", owner: "c", blocked: false },
-    { id: "m6", title: "Mission title", owner: "d", blocked: false },
-    { id: "m7", title: "Mission title", owner: "e", blocked: false },
-  ],
-  teams: ["Company", "Team 1", "Team 2"],
-  setup: { approvalDefault: "Manager approves", rolesNeedOwner: true },
 };
-let uid = 100;
+S.teams.forEach((t) => (t.lead = t.members[0].id));
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const person = (id) => S.people.find((p) => p.id === id);
-const reports = (id) => S.people.filter((p) => p.manager === id);
-const descendants = (id) => reports(id).flatMap((r) => [r, ...descendants(r.id)]);
-const rolesOf = (id) => S.roles.filter((r) => r.owner === id);
-const missionsOf = (id) => S.missions.filter((m) => m.owner === id);
-const oversees = (id) => descendants(id).reduce((n, p) => n + missionsOf(p.id).length, 0);
-const heavy = (id) => rolesOf(id).length + missionsOf(id).length + reports(id).length >= 5;
-const initial = (name) => { const w = name.trim().split(/\s+/); return (w[w.length - 1][0] || "?").toUpperCase(); };
-const root = () => S.people.find((p) => !p.manager);
-const STATUS = { active: ["Active", "dot"], idle: ["Idle", "dot idle"], paused: ["Paused", "dot paused"] };
-const st = (s) => `<span class="st"><i class="${STATUS[s][1]}"></i>${STATUS[s][0]}</span>`;
-const plural = (n, w, many) => `${n} ${n === 1 ? w : many || w + "s"}`;
+const initials = (n) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+const email = (n) => n.toLowerCase().replace(/[^a-z\s]/g, "").trim().replace(/\s+/g, ".") + "@flownt.com";
+const members = (n) => `${n} member${n === 1 ? "" : "s"}`;
+const team = (id) => S.teams.find((t) => t.id === id);
+const leadOf = (t) => t.members.find((x) => x.id === t.lead);
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "team";
 
 function toast(msg) {
   const t = $("#toast"); t.textContent = msg; t.hidden = false;
   clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 2600);
 }
 
-function needsItems() {
-  const items = [];
-  S.roles.filter((r) => !r.owner).forEach((r) => items.push({ text: `${r.name} has no owner`, sub: "AI roles need someone accountable", btn: "Assign", act: "assign-role", arg: r.id }));
-  S.missions.filter((m) => m.blocked).forEach((m) => items.push({ text: `${m.title} is blocked`, sub: `Owned by ${person(m.owner)?.name || "nobody"}`, btn: "Unblock", act: "unblock", arg: m.id }));
-  S.people.filter((p) => heavy(p.id)).forEach((p) => items.push({ text: `${p.name} has a heavy load`, sub: `${plural(rolesOf(p.id).length, "AI role")} · ${plural(missionsOf(p.id).length, "mission")}`, btn: "Review", act: "open", arg: p.id }));
-  return items;
-}
+/* ---------- Routing: #team-<id> opens a team, anything else shows the list ---------- */
+const route = () => { const h = location.hash.slice(1); return h.startsWith("team-") ? h.slice(5) : null; };
+const go = (hash) => { if (location.hash.slice(1) !== hash) location.hash = hash; else render(); };
+window.addEventListener("hashchange", () => { S.nav = "teams"; render(); $("#content").scrollTop = 0; });
 
 /* ---------- Render ---------- */
 function render() {
   renderNav();
-  $("#needs-count").textContent = needsItems().length;
-  if (!$("#needs-pop").hidden) renderNeeds();
-  renderContent();
-  renderPanel();
+  const c = $("#content");
+  if (S.nav !== "teams") { c.innerHTML = placeholder(); return; }
+  const t = team(route());
+  c.innerHTML = t ? teamView(t) : listView();
+  document.title = t ? `${t.name} · Flownt` : "Flownt My Teams";
 }
 
 function renderNav() {
-  const items = [["home", "Home"], ["needs", "Needs You"], ["team", "My Team"], ["workforce", "AI Workforce"], ["missions", "Missions"], ["outcomes", "Outcomes"]];
-  const n = needsItems().length;
-  $("#nav").innerHTML = items.map(([k, l]) =>
-    `<button class="nav ${S.nav === k ? "on" : ""}" data-action="nav" data-k="${k}"><i></i>${l}${k === "needs" && n ? `<span class="count">${n}</span>` : ""}</button>`).join("");
+  const items = [["home", "Home"], ["needs", "Needs You"], ["teams", "My Teams"], ["workforce", "AI Workforce"], ["missions", "Missions"], ["outcomes", "Outcomes"]];
+  $("#nav").innerHTML = items.map(([k, l]) => `<button class="nav ${S.nav === k ? "on" : ""}" data-action="nav" data-k="${k}"><i></i>${l}</button>`).join("");
 }
 
-function renderContent() {
-  const c = $("#content");
-  if (S.nav !== "team") {
-    const label = { home: "Home", needs: "Needs You", workforce: "AI Workforce", missions: "Missions", outcomes: "Outcomes" }[S.nav];
-    c.innerHTML = `<h1>${label}</h1><p class="lede">This screen isn't part of the prototype yet.</p>
-      <div class="placeholder"><h2>${label} goes here</h2><p>Only My Team is clickable in this prototype.</p>
-      <button class="btn fill" data-action="nav" data-k="team">Back to My Team</button></div>`;
-    return;
-  }
-  const managers = S.people.filter((p) => reports(p.id).length).length;
-  const teams = new Set(S.people.filter((p) => p.manager).map((p) => p.team)).size;
-  const unowned = S.roles.filter((r) => !r.owner).length;
-  const blocked = S.missions.filter((m) => m.blocked).length;
-
-  c.innerHTML = `
-    <h1>My Team</h1>
-    <p class="lede">Who owns and oversees your AI organization. Role settings live in AI Workforce; mission evidence lives in Mission Control.</p>
-    <div class="actions">
-      <button class="btn" data-action="assign-role">Assign AI role</button>
-      <button class="btn fill" data-action="add-person">+ Add person</button>
-    </div>
-    <div class="stats">
-      <button class="stat" data-action="tab" data-k="org"><h3>People</h3><strong>${S.people.length}</strong><span>${plural(managers, "manager")} · ${plural(teams, "team")}</span></button>
-      <button class="stat" data-action="tab" data-k="roles"><h3>AI roles</h3><strong>${S.roles.length}</strong><span>${unowned ? `${unowned} without an owner` : "All have an owner"}</span></button>
-      <button class="stat" data-action="todo" data-what="Missions"><h3>Active missions</h3><strong>${S.missions.length}</strong><span>${blocked ? `${blocked} blocked` : "None blocked"}</span></button>
-    </div>
-    <div class="tabs" role="tablist">
-      ${[["org", "Org chart"], ["roles", "AI role ownership"], ["setup", "Organization setup"]].map(([k, l]) =>
-        `<button class="tab ${S.tab === k ? "on" : ""}" role="tab" aria-selected="${S.tab === k}" data-action="tab" data-k="${k}">${l}</button>`).join("")}
-    </div>
-    <div id="tab-body">${S.tab === "org" ? orgTab() : S.tab === "roles" ? rolesTab() : setupTab()}</div>`;
+function placeholder() {
+  const label = { home: "Home", needs: "Needs You", workforce: "AI Workforce", missions: "Missions", outcomes: "Outcomes" }[S.nav];
+  return `<div class="wrap"><h1>${label}</h1><p class="lede" style="margin-bottom:24px">This screen isn't part of the prototype yet.</p>
+    <div class="placeholder"><h2>${label} goes here</h2><p>Only My Teams is clickable in this prototype.</p>
+    <button class="btn primary" data-action="nav" data-k="teams">Go to My Teams</button></div></div>`;
 }
 
-function orgTab() {
-  return `
-    <div class="legend-row">
-      <span>AI role status:</span>${st("active")}${st("idle")}${st("paused")}
-      <span>▸ on a card = quick details · name = full profile</span>
-      <span class="push"><button class="btn sm" data-action="show-all">Show all details</button><button class="btn sm" data-action="hide-all">Hide all details</button></span>
+function listView() {
+  return `<div class="wrap">
+    <div class="head">
+      <div><h1>My Teams</h1><p class="lede">Manage the teams in your organization.</p></div>
+      <button class="btn primary" data-action="create">+ Create Team</button>
     </div>
-    <div class="canvas"><div class="tree"><ul>${node(root(), 0)}</ul></div></div>`;
-}
-
-function node(p, depth) {
-  const kids = reports(p.id);
-  const open = S.expanded.has(p.id);
-  const roles = rolesOf(p.id), ms = missionsOf(p.id);
-  const details = open ? `<div class="details">
-      ${roles.length ? roles.map((r) => `<div class="row"><span>AI · ${esc(r.name)}</span>${st(r.status)}</div>`).join("") : `<span class="muted">No AI roles</span>`}
-      <span class="muted">Owns ${plural(ms.length, "mission")}${oversees(p.id) ? ` · oversees ${oversees(p.id)}` : ""}</span>
-      ${heavy(p.id) ? `<span class="chip">Heavy load</span>` : ""}
-      ${ms.some((m) => m.blocked) ? `<span class="chip soft">1 mission blocked</span>` : ""}
-      <button class="link" style="align-self:flex-start" data-action="open" data-id="${p.id}">Full profile →</button>
-    </div>` : "";
-  const slot = depth === 1 && !kids.length ? `<button class="add-slot" data-action="add-person" data-id="${p.id}">+ Add person</button>` : "";
-  return `<li>
-    <div class="card ${open ? "open" : ""} ${S.selected === p.id ? "sel" : ""}">
-      <div class="card-head">
-        <button class="who" data-action="open" data-id="${p.id}"><span class="av">${esc(initial(p.name))}</span><div><b>${esc(p.name)}</b><small>${esc(p.title)} · ${esc(p.team)}</small></div></button>
-        <button class="tog" data-action="toggle" data-id="${p.id}" aria-expanded="${open}" aria-label="${open ? "Hide" : "Show"} quick details for ${esc(p.name)}">${open ? "▼" : "▶"}</button>
-      </div>${details}
-    </div>${slot}
-    ${kids.length ? `<ul>${kids.map((k) => node(k, depth + 1)).join("")}</ul>` : ""}
-  </li>`;
-}
-
-function personOptions(selected, { none = false, exclude = [] } = {}) {
-  return (none ? `<option value="">No owner</option>` : "") +
-    S.people.filter((p) => !exclude.includes(p.id)).map((p) => `<option value="${p.id}" ${p.id === selected ? "selected" : ""}>${esc(p.name)}</option>`).join("");
-}
-
-function rolesTab() {
-  return `<div class="legend-row"><span>Every AI role needs one person accountable for it. Change an owner here or from their profile.</span>
-      <span class="push"><button class="btn sm" data-action="new-role">+ New AI role</button></span></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>AI role</th><th>Status</th><th>Accountable person</th><th>Team</th><th></th></tr></thead>
-      <tbody>${S.roles.map((r) => {
-        const o = person(r.owner);
-        return `<tr class="${o ? "" : "warn"}">
-          <td><b>AI · ${esc(r.name)}</b>${o ? "" : `<br><span class="no-owner">No owner</span>`}</td>
-          <td><select data-action="set-status" data-id="${r.id}" aria-label="Status of ${esc(r.name)}">
-            ${Object.keys(STATUS).map((k) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${STATUS[k][0]}</option>`).join("")}</select></td>
-          <td><select data-action="set-owner" data-id="${r.id}" aria-label="Owner of ${esc(r.name)}">${personOptions(r.owner, { none: true })}</select></td>
-          <td>${o ? esc(o.team) : "—"}</td>
-          <td><button class="link" data-action="todo" data-what="AI Workforce">Open in AI Workforce →</button></td>
-        </tr>`;
-      }).join("")}</tbody>
-    </table></div>`;
-}
-
-function setupTab() {
-  return `<div class="setup">
-    <div class="box"><h3>Teams</h3>
-      ${S.teams.map((t) => {
-        const m = S.people.filter((p) => p.team === t);
-        const lead = m.find((p) => !m.some((q) => q.id === p.manager)) || null;
-        return `<div class="line"><span>${esc(t)}</span><span>${plural(m.length, "person", "people")}${lead ? ` · led by ${esc(lead.name)}` : ""}</span></div>`;
-      }).join("")}
-      <button class="btn sm dashed" style="align-self:flex-start" data-action="add-team">+ Add team</button>
-    </div>
-    <div class="box"><h3>Rules</h3>
-      <label>New AI roles are approved by
-        <select id="setup-approval" data-action="setup-approval">
-          ${["Manager approves", "Team lead approves", "Person A approves"].map((o) => `<option ${S.setup.approvalDefault === o ? "selected" : ""}>${o}</option>`).join("")}
-        </select></label>
-      <label>Flag AI roles without an owner in Needs You
-        <input id="setup-flag" type="checkbox" data-action="setup-flag" ${S.setup.rolesNeedOwner ? "checked" : ""}></label>
-      <div class="line"><span>Top of the org</span><span>${esc(root().name)}</span></div>
-    </div>
+    <div class="list"><table>
+      <thead><tr><th>Team</th><th>Team Lead</th><th>Members</th><th class="chev"><span hidden>Open</span></th></tr></thead>
+      <tbody>${S.teams.map((t) => `
+        <tr class="click ${S.justCreated === t.id ? "new" : ""}" tabindex="0" data-action="open" data-id="${t.id}" aria-label="Open ${esc(t.name)}">
+          <td class="team-name">${esc(t.name)}</td>
+          <td data-label="Lead">${esc(leadOf(t).name)}</td>
+          <td class="muted num">${members(t.members.length)}</td>
+          <td class="chev" aria-hidden="true">›</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
   </div>`;
 }
 
-function renderPanel() {
-  const app = $("#app"), panel = $("#panel");
-  const p = S.nav === "team" && person(S.selected);
-  app.classList.toggle("has-panel", !!p);
-  panel.hidden = !p;
-  if (!p) return;
-  const roles = rolesOf(p.id), ms = missionsOf(p.id), kids = reports(p.id), mgr = person(p.manager);
-  const ov = oversees(p.id);
-  const isRoot = !p.manager;
-  const others = S.people.filter((q) => q.id !== p.id);
-  panel.innerHTML = `
-    <div class="panel-body">
-      <div class="p-head"><span class="av lg">${esc(initial(p.name))}</span><div><h2>${esc(p.name)}</h2><small>${esc(p.title)} · ${esc(p.team)}</small></div>
-        <button class="x" data-action="close" aria-label="Close profile">×</button></div>
-
-      <div class="sec"><h3>AI roles they're accountable for</h3>
-        ${roles.map((r) => `<div class="role"><div class="row"><span>AI · ${esc(r.name)}</span>${st(r.status)}</div>
-          <div class="links"><button class="link" data-action="reassign" data-id="${r.id}">Reassign</button><button class="link" data-action="todo" data-what="AI Workforce">Open in AI Workforce →</button></div></div>`).join("")}
-        ${roles.length ? "" : `<p>None yet.</p>`}
-        <button class="btn sm dashed" style="align-self:flex-start" data-action="assign-role" data-person="${p.id}">+ Assign AI role</button>
-      </div>
-
-      <div class="sec"><h3>Missions</h3>
-        ${ms.map((m) => `<p class="ink">Owns · ${esc(m.title)}${m.blocked ? " (blocked)" : ""}</p>`).join("")}
-        ${ms.length ? "" : `<p>Doesn't own any missions.</p>`}
-        ${ov ? `<p>Oversees ${ov} more through their team and AI roles</p>` : ""}
-      </div>
-
-      <div class="sec"><h3>Workload</h3>
-        <p class="ink">${plural(roles.length, "AI role")} · ${plural(kids.length, "person", "people")} · ${plural(ms.length + ov, "mission")} · ${heavy(p.id) ? "heavy load" : "manageable load"}</p>
-      </div>
-
-      <div class="sec"><h3>Reporting</h3>
-        <div class="field"><span>Reports to</span><b>${mgr ? esc(mgr.name) : "Nobody (top of the org)"}</b>${isRoot ? "" : `<button class="link" data-action="change-manager" data-id="${p.id}">Change</button>`}</div>
-        <div class="field"><span>Manages</span><b>${kids.length ? kids.map((k) => esc(k.name)).join(", ") : "Nobody"}</b><button class="link" data-action="add-report" data-id="${p.id}">Add</button></div>
-      </div>
-
-      <div class="sec"><h3>Authority and permissions</h3>
-        <div class="kv"><span>Approves</span><span>${esc(p.approves)}</span></div>
-        <div class="kv"><span>Assigns AI roles</span><span>${isRoot ? "Anywhere" : "In " + esc(p.team)}</span></div>
-        <div class="kv"><span>Delegates to</span><span>${kids.length ? kids.map((k) => esc(k.name)).join(", ") : "—"}</span></div>
-      </div>
+function teamView(t) {
+  const lead = leadOf(t);
+  const sorted = [lead, ...t.members.filter((x) => x.id !== t.lead)];
+  return `<div class="wrap">
+    <button class="back" data-action="back">‹ My Teams</button>
+    <div class="head">
+      <div class="team-head"><span class="av lg">${esc(initials(t.name))}</span>
+        <div><h1>${esc(t.name)}</h1><p class="lede">${esc(t.about)}</p></div></div>
+      <button class="btn primary" data-action="add-member" data-id="${t.id}">+ Add member</button>
     </div>
-    <div class="panel-foot">
-      ${S.confirmRemove ? `<div class="confirm">
-          <b>Remove ${esc(p.name)} from the team?</b>
-          ${roles.length || ms.length ? `<label for="handover">Hand their ${plural(roles.length, "AI role")} and ${plural(ms.length, "mission")} to</label>
-            <select id="handover">${others.map((q) => `<option value="${q.id}" ${q.id === p.manager ? "selected" : ""}>${esc(q.name)}</option>`).join("")}</select>` : ""}
-          ${kids.length ? `<span>${kids.map((k) => esc(k.name)).join(", ")} will report to ${esc(mgr.name)}.</span>` : ""}
-          <div class="two"><button class="btn" data-action="cancel-remove">Cancel</button><button class="btn danger fill" data-action="do-remove" data-id="${p.id}">Remove</button></div>
-        </div>` : `
-        <button class="btn fill block" data-action="edit" data-id="${p.id}">Edit profile</button>
-        <button class="btn block" data-action="remove" ${isRoot ? "disabled" : ""}>Remove from team...</button>
-        <p>${isRoot ? "The top of the org can't be removed." : "We'll help reassign their AI roles and missions first."}</p>`}
-    </div>`;
-}
-
-function renderNeeds() {
-  const items = needsItems();
-  $("#needs-pop").innerHTML = `<h4>${items.length ? `${plural(items.length, "thing")} need you` : "You're all caught up"}</h4>` +
-    items.map((i) => `<div class="pop-item"><span>${esc(i.text)}<small>${esc(i.sub)}</small></span>
-      <button class="btn sm" data-action="${i.act}" data-id="${i.arg}" data-from="needs">${i.btn}</button></div>`).join("");
+    <div class="facts">
+      <div class="fact"><span>Team lead</span><b>${esc(lead.name)}</b></div>
+      <div class="fact"><span>Members</span><b class="num">${t.members.length}</b></div>
+      <div class="fact"><span>Created</span><b>${esc(t.created)}</b></div>
+    </div>
+    <div class="sec-head"><h2>Members</h2></div>
+    <div class="list"><table>
+      <thead><tr><th>Name</th><th>Role</th><th>Email</th><th><span hidden>Actions</span></th></tr></thead>
+      <tbody>${sorted.map((x) => `
+        <tr>
+          <td><div class="person"><span class="av">${esc(initials(x.name))}</span><span><b>${esc(x.name)}</b>${x.id === t.lead ? `<span class="chip">Lead</span>` : ""}</span></div></td>
+          <td class="muted">${esc(x.role)}</td>
+          <td class="muted email">${esc(email(x.name))}</td>
+          <td class="side" style="text-align:right">${x.id === t.lead ? "" : `<button class="link" data-action="make-lead" data-team="${t.id}" data-id="${x.id}">Make lead</button>`}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
+  </div>`;
 }
 
 /* ---------- Modals ---------- */
@@ -529,125 +303,52 @@ function modal({ title, intro = "", fields, submit, onSubmit }) {
   $("#modal-root").innerHTML = `<div class="scrim" data-action="scrim"><form class="modal" id="mform" role="dialog" aria-modal="true" aria-label="${esc(title)}">
     <h2>${esc(title)}</h2>${intro ? `<p>${intro}</p>` : ""}${fields}
     <span class="err" id="merr" hidden></span>
-    <div class="foot"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn fill" type="submit">${esc(submit)}</button></div>
+    <div class="foot"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn primary" type="submit">${esc(submit)}</button></div>
   </form></div>`;
   const f = $("#mform");
-  f.querySelector("input, select")?.focus();
+  f.querySelector("input")?.focus();
   f.addEventListener("submit", (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(f));
-    const err = onSubmit(data);
-    if (err) { const m = $("#merr"); m.textContent = err; m.hidden = false; return; }
-    closeModal(); render();
+    const err = onSubmit(Object.fromEntries(new FormData(f)));
+    if (err) { const el = $("#merr"); el.textContent = err; el.hidden = false; return; }
+    closeModal();
   });
 }
 const closeModal = () => ($("#modal-root").innerHTML = "");
-const teamOptions = (sel) => S.teams.map((t) => `<option ${t === sel ? "selected" : ""}>${esc(t)}</option>`).join("");
 
-function addPersonModal(managerId) {
-  const mgr = person(managerId) || person(S.selected) || root();
+function createTeam() {
   modal({
-    title: "Add person", submit: "Add person",
-    fields: `<label>Name<input id="m-name" name="name" type="text" placeholder="e.g. Person F" required></label>
-      <label>Title<input id="m-title" name="title" type="text" value="Title"></label>
-      <label>Team<select id="m-team" name="team">${teamOptions(mgr.manager ? mgr.team : "Team 1")}</select></label>
-      <label>Reports to<select id="m-mgr" name="manager">${personOptions(mgr.id)}</select></label>`,
+    title: "Create team", submit: "Create team",
+    intro: "You can add more members after the team is created.",
+    fields: `<label>Team name<input id="m-name" name="name" type="text" placeholder="e.g. Customer Success"></label>
+      <label>Team lead<input id="m-lead" name="lead" type="text" placeholder="Full name"></label>
+      <label>Lead's role<input id="m-role" name="role" type="text" placeholder="e.g. Customer Success Lead"></label>`,
     onSubmit: (d) => {
-      if (!d.name.trim()) return "Enter a name.";
-      const id = "p" + uid++;
-      S.people.push({ id, name: d.name.trim(), title: d.title.trim() || "Title", team: d.team, manager: d.manager, approves: "Up to $Y" });
-      S.selected = id; S.tab = "org"; S.confirmRemove = false;
-      toast(`Added ${d.name.trim()}`);
+      const name = d.name.trim(), lead = d.lead.trim();
+      if (!name) return "Enter a team name.";
+      if (S.teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) return `There's already a team called ${name}.`;
+      if (!lead) return "Enter the team lead's name.";
+      let id = slug(name); while (team(id)) id += "-2";
+      const first = m(lead, d.role.trim() || "Team Lead");
+      S.teams.push({ id, name, about: "A new team.", created: "Today", members: [first], lead: first.id });
+      S.justCreated = id;
+      go("");
+      toast(`Created ${name}`);
     },
   });
 }
 
-function assignRoleModal({ personId, roleId } = {}) {
-  const firstFree = S.roles.find((r) => !r.owner);
-  const sel = roleId || firstFree?.id || "__new";
+function addMember(teamId) {
+  const t = team(teamId);
   modal({
-    title: "Assign AI role", submit: "Assign",
-    intro: "The person you pick becomes accountable for this AI role.",
-    fields: `<label>AI role<select id="m-role" name="role">
-        ${S.roles.map((r) => `<option value="${r.id}" ${r.id === sel ? "selected" : ""}>${esc(r.name)} — ${r.owner ? esc(person(r.owner).name) : "no owner"}</option>`).join("")}
-        <option value="__new" ${sel === "__new" ? "selected" : ""}>New AI role…</option></select></label>
-      <label>New AI role name (only for a new role)<input id="m-rname" name="rname" type="text" placeholder="e.g. AI role 7"></label>
-      <label>Accountable person<select id="m-owner" name="owner">${personOptions(personId || S.selected || root().id)}</select></label>`,
+    title: `Add member to ${t.name}`, submit: "Add member",
+    fields: `<label>Name<input id="m-mname" name="name" type="text" placeholder="Full name"></label>
+      <label>Role<input id="m-mrole" name="role" type="text" placeholder="e.g. Software Engineer"></label>`,
     onSubmit: (d) => {
-      let r;
-      if (d.role === "__new") {
-        if (!d.rname.trim()) return "Name the new AI role.";
-        r = { id: "r" + uid++, name: d.rname.trim(), status: "idle", owner: null };
-        S.roles.push(r);
-      } else r = S.roles.find((x) => x.id === d.role);
-      r.owner = d.owner;
-      toast(`${r.name} assigned to ${person(d.owner).name}`);
-    },
-  });
-}
-
-function reassignModal(roleId) {
-  const r = S.roles.find((x) => x.id === roleId);
-  modal({
-    title: `Reassign ${r.name}`, submit: "Reassign",
-    fields: `<label>New accountable person<select id="m-owner2" name="owner">${personOptions(r.owner && S.people.find((p) => p.id !== r.owner)?.id, { none: true })}</select></label>`,
-    onSubmit: (d) => { r.owner = d.owner || null; toast(d.owner ? `${r.name} now belongs to ${person(d.owner).name}` : `${r.name} has no owner`); },
-  });
-}
-
-function changeManagerModal(id) {
-  const p = person(id);
-  const exclude = [id, ...descendants(id).map((x) => x.id)];
-  modal({
-    title: `Who does ${p.name} report to?`, submit: "Save",
-    intro: "Their own reports move with them.",
-    fields: `<label>Reports to<select id="m-mgr2" name="manager">${personOptions(p.manager, { exclude })}</select></label>`,
-    onSubmit: (d) => { p.manager = d.manager; toast(`${p.name} now reports to ${person(d.manager).name}`); },
-  });
-}
-
-function addReportModal(id) {
-  const p = person(id);
-  let up = p, ancestors = [];
-  while (up.manager) { ancestors.push(up.manager); up = person(up.manager); }
-  const exclude = [id, ...ancestors, ...reports(id).map((x) => x.id)];
-  if (S.people.length === exclude.length) {
-    modal({ title: `Add someone ${p.name} manages`, submit: "Add person", intro: "Everyone else already sits above them. Add a new person instead.", fields: "",
-      onSubmit: () => { setTimeout(() => addPersonModal(id)); } });
-    return;
-  }
-  modal({
-    title: `Add someone ${p.name} manages`, submit: "Add",
-    fields: `<label>Person<select id="m-rep" name="who">${personOptions(null, { exclude })}</select></label>`,
-    onSubmit: (d) => { person(d.who).manager = id; toast(`${person(d.who).name} now reports to ${p.name}`); },
-  });
-}
-
-function editModal(id) {
-  const p = person(id);
-  modal({
-    title: "Edit profile", submit: "Save changes",
-    fields: `<label>Name<input id="m-ename" name="name" type="text" value="${esc(p.name)}" required></label>
-      <label>Title<input id="m-etitle" name="title" type="text" value="${esc(p.title)}"></label>
-      <label>Team<select id="m-eteam" name="team">${teamOptions(p.team)}</select></label>
-      <label>Approves<input id="m-eapp" name="approves" type="text" value="${esc(p.approves)}"></label>`,
-    onSubmit: (d) => {
-      if (!d.name.trim()) return "Enter a name.";
-      Object.assign(p, { name: d.name.trim(), title: d.title.trim() || "Title", team: d.team, approves: d.approves.trim() || "—" });
-      toast("Profile saved");
-    },
-  });
-}
-
-function addTeamModal() {
-  modal({
-    title: "Add team", submit: "Add team",
-    fields: `<label>Team name<input id="m-team-name" name="name" type="text" placeholder="e.g. Team 3" required></label>`,
-    onSubmit: (d) => {
-      const n = d.name.trim();
-      if (!n) return "Enter a team name.";
-      if (S.teams.includes(n)) return "That team already exists.";
-      S.teams.push(n); toast(`Added ${n}`);
+      const name = d.name.trim();
+      if (!name) return "Enter a name.";
+      t.members.push(m(name, d.role.trim() || "Team member"));
+      render(); toast(`Added ${name} to ${t.name}`);
     },
   });
 }
@@ -658,61 +359,30 @@ function search() {
   const q = $("#q").value.trim().toLowerCase(), box = $("#results");
   if (!q) { box.hidden = true; return; }
   hits = [
-    ...S.people.filter((p) => (p.name + " " + p.team + " " + p.title).toLowerCase().includes(q)).map((p) => ({ label: p.name, sub: `Person · ${p.team}`, go: () => openPerson(p.id) })),
-    ...S.roles.filter((r) => r.name.toLowerCase().includes(q)).map((r) => ({ label: r.name, sub: `AI role · ${r.owner ? person(r.owner).name : "no owner"}`, go: () => { S.nav = "team"; S.tab = "roles"; render(); } })),
-    ...["My Team", "AI role ownership", "Organization setup"].filter((t) => t.toLowerCase().includes(q)).map((t) => ({ label: t, sub: "Page", go: () => { S.nav = "team"; S.tab = { "My Team": "org", "AI role ownership": "roles", "Organization setup": "setup" }[t]; render(); } })),
-  ];
+    ...S.teams.filter((t) => t.name.toLowerCase().includes(q)).map((t) => ({ label: t.name, sub: `Team · ${members(t.members.length)}`, go: t.id })),
+    ...S.teams.flatMap((t) => t.members.filter((x) => (x.name + " " + x.role).toLowerCase().includes(q)).map((x) => ({ label: x.name, sub: `${x.role} · ${t.name}`, go: t.id }))),
+  ].slice(0, 8);
   hl = 0;
   box.innerHTML = hits.length ? hits.map((h, i) => `<button data-action="hit" data-i="${i}" class="${i === hl ? "hl" : ""}"><span>${esc(h.label)}</span><small>${esc(h.sub)}</small></button>`).join("") : `<p>Nothing matches "${esc(q)}".</p>`;
   box.hidden = false;
 }
-function pickHit(i) { const h = hits[i]; if (!h) return; $("#q").value = ""; $("#results").hidden = true; h.go(); }
-
-function openPerson(id) {
-  S.nav = "team"; S.tab = "org"; S.selected = id; S.confirmRemove = false;
-  $("#sidebar").classList.remove("open");
-  render();
-  requestAnimationFrame(() => document.querySelector(`.card.sel`)?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" }));
-}
+function pickHit(i) { const h = hits[i]; if (!h) return; $("#q").value = ""; $("#q").blur(); $("#results").hidden = true; S.nav = "teams"; go("team-" + h.go); }
 
 /* ---------- Events ---------- */
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-action]");
   if (!e.target.closest(".search")) $("#results").hidden = true;
-  if (!e.target.closest(".top-right")) $("#needs-pop").hidden = true;
   if (!e.target.closest("#sidebar") && !e.target.closest(".menu-btn")) $("#sidebar").classList.remove("open");
   if (!t) return;
-  const { action: a, id, k } = t.dataset;
-  if (t.dataset.from === "needs") $("#needs-pop").hidden = true;
+  const { action: a, id } = t.dataset;
   switch (a) {
-    case "nav": S.nav = k; $("#sidebar").classList.remove("open"); render(); break;
+    case "nav": S.nav = t.dataset.k; $("#sidebar").classList.remove("open"); if (S.nav === "teams") go(""); else render(); break;
     case "menu": $("#sidebar").classList.toggle("open"); break;
-    case "tab": S.tab = k; render(); break;
-    case "toggle": S.expanded.has(id) ? S.expanded.delete(id) : S.expanded.add(id); render(); break;
-    case "show-all": S.people.forEach((p) => S.expanded.add(p.id)); render(); break;
-    case "hide-all": S.expanded.clear(); render(); break;
-    case "open": openPerson(id); break;
-    case "close": S.selected = null; S.confirmRemove = false; render(); break;
-    case "add-person": addPersonModal(id); break;
-    case "assign-role": assignRoleModal({ personId: t.dataset.person, roleId: id }); break;
-    case "new-role": assignRoleModal({ roleId: "__new" }); break;
-    case "reassign": reassignModal(id); break;
-    case "change-manager": changeManagerModal(id); break;
-    case "add-report": addReportModal(id); break;
-    case "edit": editModal(id); break;
-    case "add-team": addTeamModal(); break;
-    case "remove": S.confirmRemove = true; renderPanel(); break;
-    case "cancel-remove": S.confirmRemove = false; renderPanel(); break;
-    case "do-remove": {
-      const p = person(id), to = $("#handover")?.value;
-      rolesOf(id).forEach((r) => (r.owner = to)); missionsOf(id).forEach((m) => (m.owner = to));
-      reports(id).forEach((r) => (r.manager = p.manager));
-      S.people = S.people.filter((x) => x.id !== id);
-      S.selected = null; S.confirmRemove = false;
-      toast(`Removed ${p.name}`); render(); break;
-    }
-    case "unblock": { const m = S.missions.find((x) => x.id === id); m.blocked = false; toast("Mission unblocked"); render(); break; }
-    case "needs": { const pop = $("#needs-pop"); pop.hidden = !pop.hidden; if (!pop.hidden) renderNeeds(); break; }
+    case "open": S.justCreated = null; go("team-" + id); break;
+    case "back": go(""); break;
+    case "create": createTeam(); break;
+    case "add-member": addMember(id); break;
+    case "make-lead": { const tm = team(t.dataset.team); tm.lead = id; render(); toast(`${leadOf(tm).name} now leads ${tm.name}`); break; }
     case "hit": pickHit(+t.dataset.i); break;
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === t) closeModal(); break;
@@ -720,12 +390,15 @@ document.addEventListener("click", (e) => {
   }
 });
 
-document.addEventListener("change", (e) => {
-  const t = e.target, a = t.dataset.action;
-  if (a === "set-owner") { const r = S.roles.find((x) => x.id === t.dataset.id); r.owner = t.value || null; toast(t.value ? `${r.name} now belongs to ${person(t.value).name}` : `${r.name} has no owner`); render(); }
-  if (a === "set-status") { const r = S.roles.find((x) => x.id === t.dataset.id); r.status = t.value; render(); }
-  if (a === "setup-approval") { S.setup.approvalDefault = t.value; toast("Saved"); }
-  if (a === "setup-flag") { S.setup.rolesNeedOwner = t.checked; toast("Saved"); render(); }
+document.addEventListener("keydown", (e) => {
+  const row = e.target.closest?.("tr.click");
+  if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); row.click(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); }
+  if (e.key === "Escape") {
+    if ($("#modal-root").innerHTML) closeModal();
+    else if (!$("#results").hidden) { $("#results").hidden = true; $("#q").blur(); }
+    else if (route()) go("");
+  }
 });
 
 $("#q").addEventListener("input", search);
@@ -738,19 +411,6 @@ $("#q").addEventListener("keydown", (e) => {
     btns.forEach((b, i) => b.classList.toggle("hl", i === hl));
   } else if (e.key === "Enter") { e.preventDefault(); pickHit(hl); }
 });
-document.addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); }
-  if (e.key === "Escape") {
-    if ($("#modal-root").innerHTML) closeModal();
-    else if (!$("#results").hidden) { $("#results").hidden = true; $("#q").blur(); }
-    else if (!$("#needs-pop").hidden) $("#needs-pop").hidden = true;
-    else if (S.selected) { S.selected = null; S.confirmRemove = false; render(); }
-  }
-});
-
-// Needs You respects the setup toggle for ownerless roles
-const baseNeeds = needsItems;
-needsItems = function () { return baseNeeds().filter((i) => S.setup.rolesNeedOwner || i.act !== "assign-role"); };
 
 render();
 </script>
