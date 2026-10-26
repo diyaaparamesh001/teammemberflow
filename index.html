@@ -107,7 +107,11 @@
 <script>
 const $ = (s) => document.querySelector(s);
 const esc = Shell.esc;
-const SUGGESTIONS = [1, 2, 3].map((n) => ({ title: `Suggested prompt ${n}`, text: "Prompt description goes here." }));
+const SUGGESTIONS = [
+  { title: "Create AI roles", text: "Build an AI teammate for a specific responsibility." },
+  { title: "Create a mission", text: "Turn a goal into actionable work." },
+  { title: "Suggested prompt 3", text: "Prompt description goes here." },
+];
 const REPLY = "Placeholder reply from Flownt. This is where the answer to your message would appear.";
 const PROJECTS = [1, 2, 3].map((n) => ({ id: `project-${n}`, title: `Project name ${n}` }));
 const STARTER = [1, 2, 3].map((n) => ({ id: `chat-${n}`, title: `Chat title ${n}`, messages: [
