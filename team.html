@@ -54,6 +54,16 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .p-head { display: flex; align-items: center; gap: 14px; padding: 22px 22px 0; }
 .p-head h2 { font-size: 20px; font-weight: 800; }
 .p-head small { color: var(--muted); font-size: 14px; }
+.p-about { padding: 12px 22px 0; color: var(--muted); font-size: 14px; }
+.modal textarea { resize: vertical; font: inherit; }
+.modal .f small { font-weight: 400; color: var(--muted); }
+.modal div.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.modal div.f > span { font-weight: 600; }
+.modal { justify-self: center; }
+.p-rows { display: flex; flex-direction: column; gap: 8px; }
+.p-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 36px; gap: 8px; align-items: center; }
+.row-x { width: 36px; height: 36px; border-radius: 8px; color: var(--muted); display: grid; place-items: center; }
+.row-x:hover { background: var(--chip); color: var(--ink); }
 .p-head .x { margin-left: auto; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; display: grid; place-items: center; }
 .p-sum { display: flex; gap: 10px; padding: 16px 22px 0; }
 .p-stat { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -84,12 +94,12 @@ button.item:hover { background: var(--sunk); }
 select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5px 8px; background: var(--bg); font-size: 13px; }
 
 /* Modal + toast */
-.scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 60; padding: 16px; }
+.scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 60; padding: 16px; grid-template-columns: minmax(0, 1fr); }
 .modal { background: var(--bg); border-radius: 14px; width: 460px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
 .modal h2 { font-size: 20px; font-weight: 800; }
 .modal .intro { color: var(--muted); font-size: 14px; }
 .modal label.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
-.modal input[type=text], .modal select { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; width: 100%; }
+.modal input[type=text], .modal select, .modal textarea { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; width: 100%; }
 .modal .err { color: var(--bad); font-weight: 600; font-size: 13px; }
 .modal .foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 .modal .foot .left { margin-right: auto; }
@@ -158,7 +168,7 @@ function makeTeam(letter, size, roleCount, missions) {
     people.push(p);
   }
   return {
-    id: "team-" + letter.toLowerCase(), name: "Team " + letter, people, lead: lead.id,
+    id: "team-" + letter.toLowerCase(), name: "Team " + letter, about: "Team purpose goes here.", people, lead: lead.id,
     roles: Array.from({ length: roleCount }, (_, i) => ({ id: id(), name: "AI role " + (i + 1) })),
     missions: missions.map((status) => ({ id: id(), status })),
   };
@@ -229,6 +239,7 @@ function renderPanel() {
     <div class="p-head"><span class="av lg">${esc(t.name.replace(/^Team\s+/, "").slice(0, 2).toUpperCase())}</span>
       <div><h2>${esc(t.name)}</h2><small>Led by ${esc(leadOf(t).name)} · ${plural(t.people.length, "member")}</small></div>
       <button class="x" data-action="close" aria-label="Close">✕</button></div>
+    ${t.about ? `<p class="p-about">${esc(t.about)}</p>` : ""}
     <div class="p-sum">
       <div class="p-stat"><span>AI roles</span><b>${t.roles.length}</b></div>
       <div class="p-stat"><span>Mission health</span><span class="tags">${health(t)}</span></div>
@@ -272,7 +283,7 @@ function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
   f.querySelector("input[type=text], select")?.focus();
   f.addEventListener("submit", (e) => {
     e.preventDefault();
-    const err = onSubmit(Object.fromEntries(new FormData(f)));
+    const err = onSubmit(Object.fromEntries(new FormData(f)), f);
     if (err) { const el = $("#merr"); el.textContent = err; el.hidden = false; return; }
     closeModal(); render();
   });
@@ -280,19 +291,30 @@ function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
 const closeModal = () => ($("#modal-root").innerHTML = "");
 const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${Object.keys(ACCESS).map((l) => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("")}</select>`;
 
+const personRow = () => `<div class="p-row"><input type="text" name="person" placeholder="Person name" aria-label="Person name">
+  <input type="text" name="ptitle" placeholder="Title" aria-label="Title"><button type="button" class="row-x" data-action="del-row" aria-label="Remove this person">✕</button></div>`;
+
 function createTeam() {
   const next = "Team " + String.fromCharCode(65 + S.teams.length);
   modal({
-    title: "Create team", submit: "Create team", intro: "You can add people after it's created.",
+    title: "Create team", submit: "Create team", intro: "Name the team, say what it's for, and add its people.",
     fields: `<label class="f">Team name<input id="m-tname" name="name" type="text" value="${next}"></label>
-      <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>`,
-    onSubmit: (d) => {
+      <label class="f">Purpose<textarea id="m-tabout" name="about" rows="2" placeholder="What this team is responsible for"></textarea></label>
+      <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>
+      <div class="f"><span>Add people <small>· they'll report to the team lead</small></span>
+        <div id="m-people" class="p-rows">${personRow()}${personRow()}</div>
+        <button type="button" class="btn dashed sm" data-action="add-row">+ Add another person</button></div>`,
+    onSubmit: (d, f) => {
       const name = d.name.trim(); if (!name) return "Enter a team name.";
       if (S.teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) return "A team with that name already exists.";
       const lead = { id: id(), name: d.lead.trim() || "Person name", title: "Title", manager: null, access: "Admin" };
-      const t = { id: "team-" + id(), name, people: [lead], lead: lead.id, roles: [], missions: [] };
+      const people = [...f.querySelectorAll(".p-row")]
+        .map((r) => ({ name: r.querySelector("[name=person]").value.trim(), title: r.querySelector("[name=ptitle]").value.trim() }))
+        .filter((r) => r.name)
+        .map((r) => ({ id: id(), name: r.name, title: r.title || "Title", manager: lead.id, access: "Member" }));
+      const t = { id: "team-" + id(), name, about: d.about.trim(), people: [lead, ...people], lead: lead.id, roles: [], missions: [] };
       S.teams.push(t); S.selected = t.id; S.tab = "people";
-      toast(`Created ${name}`);
+      toast(`Created ${name} with ${plural(t.people.length, "member")}`);
     },
   });
 }
@@ -349,6 +371,8 @@ document.addEventListener("click", (e) => {
       t.people = t.people.filter((q) => q.id !== tid);
       closeModal(); render(); toast("Person removed"); break;
     }
+    case "add-row": { $("#m-people").insertAdjacentHTML("beforeend", personRow()); const rows = $("#m-people").querySelectorAll(".p-row"); rows[rows.length - 1].querySelector("input").focus(); break; }
+    case "del-row": el.closest(".p-row").remove(); break;
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === el) closeModal(); break;
   }
