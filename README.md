@@ -9,7 +9,7 @@ down to phone.
 | File | Page |
 | --- | --- |
 | `index.html` | **Home**: a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
-| `team.html` | **My Team**: teams list with a side sheet for People, AI roles and Access, plus each team's mission health. |
+| `team.html` | **My Team**: teams list with a side sheet for People and Access, plus each team's AI role count and mission health. |
 | `shell.css`, `shell.js` | Shared colours, main nav sidebar and top bar (Needs You, account). |
 
 AI Workforce, Missions and Outcomes aren't built yet.

@@ -42,7 +42,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .av { width: 30px; height: 30px; border-radius: 50%; background: var(--chip); display: inline-grid; place-items: center; font-weight: 800; font-size: 11px; flex: none; }
 .av.lg { width: 48px; height: 48px; font-size: 16px; }
-.av.ai { border-radius: 8px; background: var(--bg); border: 1.5px dashed var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag { display: inline-flex; align-items: center; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--chip); }
 .tag.good { color: var(--good); background: var(--good-bg); }
@@ -58,7 +57,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .p-head .x { margin-left: auto; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; display: grid; place-items: center; }
 .p-sum { display: flex; gap: 10px; padding: 16px 22px 0; }
 .p-stat { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-button.p-stat:hover { border-color: var(--accent); }
 .p-stat:first-child { flex: none; width: 96px; }
 .p-stat:last-child { flex: 1; }
 .p-stat > span:first-child { font-size: 12px; font-weight: 600; color: var(--muted); }
@@ -161,8 +159,8 @@ function makeTeam(letter, size, roleCount, missions) {
   }
   return {
     id: "team-" + letter.toLowerCase(), name: "Team " + letter, people, lead: lead.id,
-    roles: Array.from({ length: roleCount }, (_, i) => ({ id: id(), name: "AI role " + (i + 1), owner: people[(i + 1) % people.length].id })),
-    missions: missions.map((status, i) => ({ id: id(), title: "Mission title", status, owner: people[i % people.length].id, progress: [60, 35, 20, 80][i % 4] })),
+    roles: Array.from({ length: roleCount }, (_, i) => ({ id: id(), name: "AI role " + (i + 1) })),
+    missions: missions.map((status) => ({ id: id(), status })),
   };
 }
 const S = {
@@ -226,17 +224,17 @@ function renderPanel() {
   $("#app").classList.toggle("has-panel", !!t);
   panel.hidden = !t;
   if (!t) return;
-  const tabs = [["people", "People"], ["roles", "AI roles"], ["access", "Access"]];
+  const tabs = [["people", "People"], ["access", "Access"]];
   panel.innerHTML = `
     <div class="p-head"><span class="av lg">${esc(t.name.replace(/^Team\s+/, "").slice(0, 2).toUpperCase())}</span>
       <div><h2>${esc(t.name)}</h2><small>Led by ${esc(leadOf(t).name)} · ${plural(t.people.length, "member")}</small></div>
       <button class="x" data-action="close" aria-label="Close">✕</button></div>
     <div class="p-sum">
-      <button class="p-stat" data-action="tab" data-k="roles"><span>AI roles</span><b>${t.roles.length}</b></button>
+      <div class="p-stat"><span>AI roles</span><b>${t.roles.length}</b></div>
       <div class="p-stat"><span>Mission health</span><span class="tags">${health(t)}</span></div>
     </div>
     <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${S.tab === k ? "on" : ""}" role="tab" aria-selected="${S.tab === k}" data-action="tab" data-k="${k}">${l}</button>`).join("")}</div>
-    <div class="p-body">${({ people: peopleTab, roles: rolesTab, access: accessTab })[S.tab](t)}</div>`;
+    <div class="p-body">${({ people: peopleTab, access: accessTab })[S.tab](t)}</div>`;
 }
 
 function peopleTab(t) {
@@ -249,14 +247,6 @@ function peopleTab(t) {
       <span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}${mgr ? ` · reports to ${esc(mgr.name)}` : p === lead ? " · team lead" : ""}</small></span>
       <span class="tag">${p.access}</span></button>`;
   }).join("");
-}
-
-function rolesTab(t) {
-  return `<button class="btn dashed" data-action="set-role" data-team="${t.id}" style="margin-bottom:6px">+ Turn on AI role</button>` +
-    (t.roles.length ? t.roles.map((r) => `<button class="item" data-action="edit-role" data-id="${r.id}">
-      <span class="av ai">AI</span>
-      <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span></button>`).join("")
-    : `<p class="muted">No AI roles on this team yet.</p>`);
 }
 
 function accessTab(t) {
@@ -293,7 +283,7 @@ const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${
 function createTeam() {
   const next = "Team " + String.fromCharCode(65 + S.teams.length);
   modal({
-    title: "Create team", submit: "Create team", intro: "You can add people and AI roles after it's created.",
+    title: "Create team", submit: "Create team", intro: "You can add people after it's created.",
     fields: `<label class="f">Team name<input id="m-tname" name="name" type="text" value="${next}"></label>
       <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>`,
     onSubmit: (d) => {
@@ -341,32 +331,6 @@ function editPerson(pid) {
   });
 }
 
-function setRole(teamId) {
-  const t = team(teamId || S.selected) || S.teams[0];
-  modal({
-    title: "Set up AI role", submit: "Turn on", intro: "Choose a team and who is accountable for the AI role.",
-    fields: `<label class="f">Team<select id="m-rteam" name="team" data-action="role-team">${S.teams.map((x) => `<option value="${x.id}" ${x === t ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
-      <label class="f">AI role name<input id="m-rname" name="name" type="text" value="AI role ${t.roles.length + 1}"></label>
-      <label class="f">Accountable person<select id="m-rowner" name="owner">${peopleOptions(t, t.lead)}</select></label>`,
-    onSubmit: (d) => {
-      const tt = team(d.team);
-      tt.roles.push({ id: id(), name: d.name.trim() || "AI role", owner: d.owner });
-      S.selected = tt.id; S.tab = "roles"; toast("AI role turned on");
-    },
-  });
-}
-
-function editRole(rid) {
-  const t = team(S.selected), r = t.roles.find((x) => x.id === rid);
-  modal({
-    title: r.name, submit: "Save",
-    fields: `<label class="f">AI role name<input id="m-ername" name="name" type="text" value="${esc(r.name)}"></label>
-      <label class="f">Accountable person<select id="m-eowner" name="owner">${peopleOptions(t, r.owner)}</select></label>`,
-    extra: `<button type="button" class="btn danger left" data-action="remove-role" data-id="${rid}">Turn off</button>`,
-    onSubmit: (d) => { r.name = d.name.trim() || r.name; r.owner = d.owner; toast("Saved"); },
-  });
-}
-
 /* ---------- Events ---------- */
 document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
@@ -379,17 +343,12 @@ document.addEventListener("click", (e) => {
     case "create-team": createTeam(); break;
     case "add-person": addPerson(); break;
     case "edit-person": editPerson(tid); break;
-    case "set-role": setRole(el.dataset.team); break;
-    case "edit-role": editRole(tid); break;
     case "remove-person": {
       const t = team(S.selected), p = person(t, tid);
       t.people.filter((q) => q.manager === tid).forEach((q) => (q.manager = p.manager));
-      t.roles.forEach((r) => r.owner === tid && (r.owner = t.lead));
-      t.missions.forEach((m) => m.owner === tid && (m.owner = t.lead));
       t.people = t.people.filter((q) => q.id !== tid);
       closeModal(); render(); toast("Person removed"); break;
     }
-    case "remove-role": { const t = team(S.selected); t.roles = t.roles.filter((r) => r.id !== tid); closeModal(); render(); toast("AI role turned off"); break; }
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === el) closeModal(); break;
   }
@@ -406,11 +365,6 @@ document.addEventListener("input", (e) => {
 document.addEventListener("change", (e) => {
   const el = e.target;
   if (el.dataset.action === "set-access") { const t = team(S.selected); person(t, el.dataset.id).access = el.value; render(); toast("Access updated"); }
-  if (el.dataset.action === "role-team") {
-    const t = team(el.value);
-    $("#m-rowner").innerHTML = peopleOptions(t, t.lead);
-    $("#m-rname").value = "AI role " + (t.roles.length + 1);
-  }
 });
 
 document.addEventListener("keydown", (e) => {
