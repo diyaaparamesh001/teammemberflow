@@ -1,6 +1,6 @@
 /* Flownt prototype — renders the main nav and utility bar shared by every page.
    A page calls Shell.mount("home" | "team" | "workforce", { title, action }) once: title is the page name shown in the top bar,
-   action is optional HTML placed beside Needs You. */
+   action is optional HTML placed beside Needs You; needs: false hides the Needs You button. */
 (function () {
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -13,7 +13,7 @@
   const navLink = (href, label, on) => `<a class="nav ${on ? "on" : ""}" href="${href}"><i></i>${label}</a>`;
   const todo = (label) => `<button class="nav" data-shell="todo" data-what="${label}"><i></i>${label}</button>`;
 
-  function mount(page, { title = "", action = "" } = {}) {
+  function mount(page, { title = "", action = "", needs = true } = {}) {
     $("#sidebar").innerHTML = `
       <a class="brand" href="home.html"><i></i>Flownt</a>
       ${navLink("home.html", "Home", page === "home")}
@@ -26,7 +26,7 @@
       ${title ? `<h1 class="top-title">${esc(title)}</h1>` : ""}
       <div class="top-right">
         ${action}
-        <button class="needs-btn" data-shell="todo" data-what="Needs You"><i></i><span class="lbl">Needs You</span><b>3</b></button>
+        ${needs ? `<button class="needs-btn" data-shell="todo" data-what="Needs You"><i></i><span class="lbl">Needs You</span><b>3</b></button>` : ""}
         <button class="me" aria-label="Your account" data-shell="todo" data-what="Your account"></button>
       </div>`;
 
