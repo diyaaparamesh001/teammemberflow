@@ -64,38 +64,23 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .more { font-size: 13px; color: var(--muted); }
 .link { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; color: var(--ink); }
 
-/* Person access panel */
+/* Person profile panel (read-only) */
 .panel { border-left: 1px solid var(--line-soft); display: flex; flex-direction: column; min-width: 0; background: var(--bg); overflow-y: auto; padding: 22px; gap: 14px; }
 .p-head { display: flex; align-items: center; gap: 12px; }
 .p-head h2 { font-size: 19px; font-weight: 800; }
 .p-head small { color: var(--muted); font-size: 14px; }
 .p-head .x { margin-left: auto; width: 38px; height: 38px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 17px; flex: none; display: grid; place-items: center; }
-.panel h3 { font-size: 16px; font-weight: 800; margin-top: 4px; }
-.level { display: flex; gap: 12px; align-items: flex-start; border: 1.5px solid var(--line-soft); border-radius: 10px; padding: 12px 14px; width: 100%; }
-.level:hover:not(:disabled) { border-color: var(--accent); }
-.level.on { border-color: var(--accent); background: var(--accent-soft); }
-.level:disabled { cursor: default; opacity: .6; }
-.level .dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none; margin-top: 2px; }
-.level.on .dot { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px var(--bg); }
-.level b { display: block; }
-.level small { color: var(--muted); font-size: 13px; }
-.p-note { color: var(--muted); font-size: 13px; }
-.p-foot { margin-top: auto; padding-top: 8px; }
+.sec { display: flex; flex-direction: column; gap: 8px; }
+.sec h3 { font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.kv { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+.kv:last-child { border-bottom: 0; }
+.kv span:first-child { color: var(--muted); }
+.kv span:last-child { font-weight: 600; text-align: right; }
+.p-mission { display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 9px 12px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 14px; }
+.act { display: flex; flex-direction: column; gap: 2px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+.act:last-child { border-bottom: 0; }
+.act small { color: var(--muted); font-size: 12px; }
 
-/* Modals */
-.scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 60; padding: 16px; grid-template-columns: minmax(0, 1fr); }
-.modal { background: var(--bg); border-radius: 14px; width: 460px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; justify-self: center; }
-.modal h2 { font-size: 20px; font-weight: 800; }
-.modal .intro { color: var(--muted); font-size: 14px; }
-.modal label.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
-.modal div.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-.modal div.f > span { font-weight: 600; }
-.modal .f small { font-weight: 400; color: var(--muted); }
-.modal input[type=text], .modal select, .modal textarea { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; width: 100%; }
-.modal textarea { resize: vertical; font: inherit; }
-.modal .err { color: var(--bad); font-weight: 600; font-size: 13px; }
-.modal .foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-.modal .foot .left { margin-right: auto; }
 
 /* Responsive */
 @media (max-width: 1180px) {
@@ -133,16 +118,10 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   <aside class="panel" id="panel" hidden></aside>
 </div>
-<div id="modal-root"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script src="shell.js"></script>
 <script>
-const ACCESS = {
-  Admin: "Manages the team, its people, AI roles and access.",
-  Captain: "Leads their reports and approves AI role work.",
-  Member: "Works on missions and uses the team's AI roles.",
-};
 const SHOWN = 5;   // people shown before "Show all"
 
 let uid = 1;
@@ -187,9 +166,7 @@ const leadOf = (t) => person(t, t.lead);
 const rolesOf = (t, pid) => t.roles.filter((r) => r.owner === pid);
 // Placeholder names repeat, so pickers number people in list order.
 const label = (t, p) => `${p.name} ${t.people.indexOf(p) + 1}${p.title ? " · " + p.title : ""}`;
-const peopleOptions = (t, sel, exclude = []) => t.people.filter((p) => !exclude.includes(p.id))
-  .map((p) => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(label(t, p))}</option>`).join("");
-const toast = Shell.toast;
+const TEAM_ROLE = { Admin: "Team Lead", Captain: "Team Captain", Member: "Team Member" };
 
 /* ---------- Render ---------- */
 function render() {
@@ -219,7 +196,7 @@ function renderDetail() {
       <thead><tr><th>Person</th><th>AI roles they look after</th><th>Access</th><th class="chev"></th></tr></thead>
       <tbody>${visible.map((p) => {
         const roles = rolesOf(t, p.id);
-        return `<tr class="click ${S.person === p.id ? "sel" : ""}" tabindex="0" data-action="person" data-id="${p.id}" aria-label="Open access for ${esc(label(t, p))}">
+        return `<tr class="click ${S.person === p.id ? "sel" : ""}" tabindex="0" data-action="person" data-id="${p.id}" aria-label="View ${esc(label(t, p))}">
           <td><span class="who"><span class="av">${esc(initials(p.name))}</span><span><b>${esc(p.name)}</b><small>${esc(p.title)}${p === lead ? " · team lead" : ""}</small></span></span></td>
           <td>${roles.length ? `<span class="roles">${roles.map((r) => `<span class="ai"><i>AI</i>${esc(r.name)}</span>`).join("")}</span>` : `<span class="muted">—</span>`}</td>
           <td><span class="tag">${p.access}</span></td>
@@ -236,52 +213,20 @@ function renderPanel() {
   $("#app").classList.toggle("has-panel", !!p);
   panel.hidden = !p;
   if (!p) return;
-  const isLead = p.id === t.lead;
+  const roles = rolesOf(t, p.id);
   panel.innerHTML = `
     <div class="p-head"><span class="av lg">${esc(initials(p.name))}</span>
-      <div><h2>${esc(p.name)}</h2><small>${esc(p.title)} · ${esc(t.name)}</small></div>
+      <div><h2>${esc(p.name)}</h2><small>${esc(t.name)}</small></div>
       <button class="x" data-action="close" aria-label="Close">✕</button></div>
-    <h3>Access</h3>
-    ${Object.entries(ACCESS).map(([l, d]) => `<button class="level ${p.access === l ? "on" : ""}" data-action="set-access" data-level="${l}" aria-pressed="${p.access === l}" ${isLead ? "disabled" : ""}>
-      <span class="dot" aria-hidden="true"></span><span><b>${l}</b><small>${d}</small></span></button>`).join("")}
-    ${isLead ? `<p class="p-note">The team lead is always an Admin.</p>` : ""}
-    <div class="p-foot"><button class="btn" data-action="edit-person" data-id="${p.id}">Edit person</button></div>`;
-}
-
-/* ---------- Modals ---------- */
-function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
-  $("#modal-root").innerHTML = `<div class="scrim" data-action="scrim"><form class="modal" id="mform" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-    <h2>${esc(title)}</h2>${intro ? `<p class="intro">${intro}</p>` : ""}${fields}
-    <span class="err" id="merr" hidden></span>
-    <div class="foot">${extra}<button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn primary" type="submit">${esc(submit)}</button></div>
-  </form></div>`;
-  const f = $("#mform");
-  f.querySelector("input[type=text], select")?.focus();
-  f.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const err = onSubmit(Object.fromEntries(new FormData(f)), f);
-    if (err) { const el = $("#merr"); el.textContent = err; el.hidden = false; return; }
-    closeModal(); render();
-  });
-}
-const closeModal = () => ($("#modal-root").innerHTML = "");
-
-function editPerson(pid) {
-  const t = team(S.selected), p = person(t, pid), isLead = pid === t.lead;
-  const below = (x) => t.people.filter((q) => q.manager === x).flatMap((q) => [q.id, ...below(q.id)]);
-  modal({
-    title: "Edit person", submit: "Save",
-    fields: `<label class="f">Name<input id="m-ename" name="name" type="text" value="${esc(p.name)}"></label>
-      <label class="f">Title<input id="m-etitle" name="title" type="text" value="${esc(p.title)}"></label>
-      ${isLead ? `<p class="intro">This person leads ${esc(t.name)} and doesn't report to anyone on the team.</p>`
-        : `<label class="f">Reports to<select id="m-emgr" name="manager">${peopleOptions(t, p.manager, [pid, ...below(pid)])}</select></label>`}`,
-    extra: isLead ? "" : `<button type="button" class="btn danger left" data-action="remove-person" data-id="${pid}">Remove</button>`,
-    onSubmit: (d) => {
-      p.name = d.name.trim() || "Person name"; p.title = d.title.trim() || "Title";
-      if (!isLead) p.manager = d.manager;
-      toast("Saved");
-    },
-  });
+    <div class="sec"><h3>Basic information</h3>
+      <div><div class="kv"><span>Name</span><span>${esc(p.name)}</span></div>
+      <div class="kv"><span>Job title</span><span>${esc(p.title)}</span></div>
+      <div class="kv"><span>Team role</span><span>${TEAM_ROLE[p.access]}</span></div></div></div>
+    <div class="sec"><h3>AI roles they look after</h3>
+      ${roles.length ? `<span class="roles">${roles.map((r) => `<span class="ai"><i>AI</i>${esc(r.name)}</span>`).join("")}</span>` : `<p class="muted">None</p>`}</div>
+    <div class="sec"><h3>Active missions</h3><div class="p-mission"><span aria-hidden="true">⚑</span>${esc(t.mission)}</div></div>
+    <div class="sec"><h3>Recent activity</h3>
+      <div>${[1, 2, 3].map(() => `<div class="act">Activity description goes here.<small>Date</small></div>`).join("")}</div></div>`;
 }
 
 /* ---------- Events ---------- */
@@ -293,21 +238,6 @@ document.addEventListener("click", (e) => {
     case "person": S.person = tid; renderDetail(); renderPanel(); break;
     case "close": S.person = null; renderDetail(); renderPanel(); break;
     case "toggle-all": S.showAll = !S.showAll; renderDetail(); break;
-    case "set-access": {
-      const p = person(team(S.selected), S.person);
-      if (p.access !== el.dataset.level) { p.access = el.dataset.level; renderDetail(); renderPanel(); toast(`Access set to ${p.access}`); }
-      break;
-    }
-    case "edit-person": editPerson(tid); break;
-    case "remove-person": {
-      const t = team(S.selected), p = person(t, tid);
-      t.people.filter((q) => q.manager === tid).forEach((q) => (q.manager = p.manager));
-      t.roles.forEach((r) => r.owner === tid && (r.owner = t.lead));
-      t.people = t.people.filter((q) => q.id !== tid);
-      S.person = null; closeModal(); render(); toast("Person removed"); break;
-    }
-    case "close-modal": closeModal(); break;
-    case "scrim": if (e.target === el) closeModal(); break;
   }
 });
 
@@ -315,8 +245,7 @@ document.addEventListener("keydown", (e) => {
   const row = e.target.closest?.("tr.click");
   if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); row.click(); }
   if (e.key === "Escape") {
-    if ($("#modal-root").innerHTML) closeModal();
-    else if (S.person) { S.person = null; renderDetail(); renderPanel(); }
+    if (S.person) { S.person = null; renderDetail(); renderPanel(); }
   }
 });
 
