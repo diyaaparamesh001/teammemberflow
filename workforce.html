@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* AI Workforce: count squares + Create AI role, filters, AI role table | role detail panel.
+/* AI Workforce: Create AI role in the top bar; count squares, filters, AI role table | role detail panel.
    Shared tokens and shell live in shell.css. */
 .app.has-panel { grid-template-columns: 248px minmax(0, 1fr) 420px; }
 .content { padding-top: 6px; }
@@ -19,7 +19,6 @@
 .stat { width: 136px; aspect-ratio: 1; flex: 0 1 136px; min-width: 0; border: 1.5px solid var(--line-soft); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; }
 .stat span { font-size: 13px; font-weight: 600; color: var(--muted); }
 .stat b { margin-top: auto; font-size: 30px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.top-row .btn.primary { align-self: flex-start; }
 
 .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
 .filters label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
@@ -84,7 +83,7 @@ td.name { font-weight: 700; white-space: nowrap; }
   .app.has-panel { grid-template-columns: minmax(0, 1fr); }
   .content { padding-top: 10px; }
   .stat { padding: 12px; }
-  .top-row .btn.primary { width: 100%; }
+  .top-right .btn.primary { padding: 8px 12px; font-size: 14px; }
   .filters label { flex: 1; min-width: 140px; }
   .filters select { flex: 1; }
 
@@ -98,6 +97,10 @@ td.name { font-weight: 700; white-space: nowrap; }
   tr.click:hover td, tr.sel td { background: none; }
   tr.sel { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
   tr.sel td:first-child { box-shadow: none; }
+}
+@media (max-width: 520px) {
+  .top-right .btn.create { width: 38px; height: 38px; padding: 0; font-size: 22px; }
+  .top-right .create .lbl { display: none; }
 }
 </style>
 </head>
@@ -145,7 +148,6 @@ function render() {
     <div class="top-row">
       <div class="stat"><span>Total AI workflows</span><b>${S.roles.length}</b></div>
       <div class="stat"><span>Current active workflows</span><b>${active}</b></div>
-      <button class="btn primary" data-action="create">Create AI role</button>
     </div>
     <div class="filters">
       <label>Team <select id="f-team" aria-label="Filter by team"><option value="">All teams</option>${TEAMS.map((t) => `<option ${S.team === t ? "selected" : ""}>${t}</option>`).join("")}</select></label>
@@ -248,7 +250,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-Shell.mount("workforce", { title: "AI Workforce" });
+Shell.mount("workforce", { title: "AI Workforce", action: `<button class="btn primary create" data-action="create" aria-label="Create AI role">+<span class="lbl">&nbsp;Create AI role</span></button>` });
 render();
 </script>
 </body>
