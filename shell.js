@@ -1,5 +1,5 @@
 /* Flownt prototype — renders the main nav and utility bar shared by every page.
-   A page calls Shell.mount("home" | "team", { title, action }) once: title is the page name shown in the top bar,
+   A page calls Shell.mount("home" | "team" | "workforce", { title, action }) once: title is the page name shown in the top bar,
    action is optional HTML placed beside Needs You. */
 (function () {
   const $ = (s) => document.querySelector(s);
@@ -18,7 +18,7 @@
       <a class="brand" href="index.html"><i></i>Flownt</a>
       ${navLink("index.html", "Home", page === "home")}
       ${navLink("team.html", "My Team", page === "team")}
-      ${todo("AI Workforce")}
+      ${navLink("workforce.html", "AI Workforce", page === "workforce")}
       ${todo("Missions")}
       ${todo("Outcomes")}`;
     $("#topbar").innerHTML = `

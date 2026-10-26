@@ -10,9 +10,10 @@ down to phone.
 | --- | --- |
 | `index.html` | **Home**: a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
 | `team.html` | **My Team**: a team list on the left; the selected team shows its mission and its people with the AI roles each one looks after. Clicking a person opens their access. |
+| `workforce.html` | **AI Workforce**: total and active workflow counts, Create AI role, and a table of AI roles (role, purpose, owner, team, status) with team and status filters. Clicking a role shows its instructions, tools, owner, teams and missions. |
 | `shell.css`, `shell.js` | Shared colours, main nav sidebar and top bar (Needs You, account). |
 
-AI Workforce, Missions and Outcomes aren't built yet.
+Missions and Outcomes aren't built yet.
 New chats are kept while the tab is open; everything else resets on reload.
 
 ## Run locally
