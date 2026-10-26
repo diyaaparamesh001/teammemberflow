@@ -108,10 +108,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .modal .err { color: var(--bad); font-weight: 600; font-size: 13px; }
 .modal .foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 .modal .foot .left { margin-right: auto; }
-.p-rows { display: flex; flex-direction: column; gap: 8px; }
-.p-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 36px; gap: 8px; align-items: center; }
-.row-x { width: 36px; height: 36px; border-radius: 8px; color: var(--muted); display: grid; place-items: center; }
-.row-x:hover { background: var(--chip); color: var(--ink); }
 
 /* Responsive */
 @media (max-width: 1180px) {
@@ -122,7 +118,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 @media (max-width: 860px) {
   .app.has-panel { grid-template-columns: minmax(0, 1fr); }
   .content { padding-top: 10px; }
-  .top-right .btn.primary { padding: 8px 12px; font-size: 14px; }
   .stat { padding: 12px; }
   .stat span { min-height: 2.6em; }
   .split { grid-template-columns: minmax(0, 1fr); }
@@ -138,10 +133,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   tr.click:hover td, tr.sel td { background: none; }
   tr.sel { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
   tr.sel td:first-child { box-shadow: none; }
-}
-@media (max-width: 520px) {
-  .top-right .btn.create { width: 38px; height: 38px; padding: 0; font-size: 22px; }
-  .top-right .create .lbl { display: none; }
 }
 </style>
 </head>
@@ -307,34 +298,6 @@ function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
 const closeModal = () => ($("#modal-root").innerHTML = "");
 const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${Object.keys(ACCESS).map((l) => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("")}</select>`;
 
-const personRow = () => `<div class="p-row"><input type="text" name="person" placeholder="Person name" aria-label="Person name">
-  <input type="text" name="ptitle" placeholder="Title" aria-label="Title"><button type="button" class="row-x" data-action="del-row" aria-label="Remove this person">✕</button></div>`;
-
-function createTeam() {
-  const next = "Team " + String.fromCharCode(65 + S.teams.length);
-  modal({
-    title: "Create team", submit: "Create team", intro: "Name the team, say what it's for, and add its people.",
-    fields: `<label class="f">Team name<input id="m-tname" name="name" type="text" value="${next}"></label>
-      <label class="f">Purpose<textarea id="m-tabout" name="about" rows="2" placeholder="What this team is responsible for"></textarea></label>
-      <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>
-      <div class="f"><span>Add people <small>· they'll report to the team lead</small></span>
-        <div id="m-people" class="p-rows">${personRow()}${personRow()}</div>
-        <button type="button" class="btn dashed sm" data-action="add-row">+ Add another person</button></div>`,
-    onSubmit: (d, f) => {
-      const name = d.name.trim(); if (!name) return "Enter a team name.";
-      if (S.teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) return "A team with that name already exists.";
-      const lead = { id: id(), name: d.lead.trim() || "Person name", title: "Title", manager: null, access: "Admin" };
-      const people = [...f.querySelectorAll(".p-row")]
-        .map((r) => ({ name: r.querySelector("[name=person]").value.trim(), title: r.querySelector("[name=ptitle]").value.trim() }))
-        .filter((r) => r.name)
-        .map((r) => ({ id: id(), name: r.name, title: r.title || "Title", manager: lead.id, access: "Member" }));
-      const t = { id: "team-" + id(), name, about: d.about.trim(), mission: "Mission title", people: [lead, ...people], lead: lead.id, roles: [], missions: [] };
-      S.teams.push(t); S.selected = t.id; S.person = null; S.showAll = false; S.query = "";
-      toast(`Created ${name} with ${plural(t.people.length, "member")}`);
-    },
-  });
-}
-
 function addPerson() {
   const t = team(S.selected);
   modal({
@@ -383,7 +346,6 @@ document.addEventListener("click", (e) => {
       if (p.access !== el.dataset.level) { p.access = el.dataset.level; renderDetail(); renderPanel(); toast(`Access set to ${p.access}`); }
       break;
     }
-    case "create-team": createTeam(); break;
     case "add-person": addPerson(); break;
     case "edit-person": editPerson(tid); break;
     case "remove-person": {
@@ -393,8 +355,6 @@ document.addEventListener("click", (e) => {
       t.people = t.people.filter((q) => q.id !== tid);
       S.person = null; closeModal(); render(); toast("Person removed"); break;
     }
-    case "add-row": { $("#m-people").insertAdjacentHTML("beforeend", personRow()); const rows = $("#m-people").querySelectorAll(".p-row"); rows[rows.length - 1].querySelector("input").focus(); break; }
-    case "del-row": el.closest(".p-row").remove(); break;
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === el) closeModal(); break;
   }
@@ -413,7 +373,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-Shell.mount("team", { title: "My Team", action: `<button class="btn primary create" data-action="create-team" aria-label="Create team">+<span class="lbl">&nbsp;Create Team</span></button>` });
+Shell.mount("team", { title: "My Team" });
 render();
 </script>
 </body>
