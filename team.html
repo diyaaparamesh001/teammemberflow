@@ -141,7 +141,7 @@ select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5p
 <script>
 const ACCESS = {
   Admin: "Manages the team, its people, AI roles and access.",
-  Manager: "Manages their reports and approves AI role work.",
+  Captain: "Leads their reports and approves AI role work.",
   Member: "Works on missions and uses the team's AI roles.",
 };
 const STATUS = { good: "On track", warn: "At risk", bad: "Blocked" };
@@ -155,7 +155,7 @@ function makeTeam(letter, size, roleCount, missions) {
   const mgrs = [];
   for (let i = 1; i < size; i++) {
     const isMgr = i <= 2 && size > 6;
-    const p = { id: id(), name: "Person name", title: "Title", manager: isMgr || !mgrs.length ? lead.id : mgrs[i % mgrs.length].id, access: isMgr ? "Manager" : "Member" };
+    const p = { id: id(), name: "Person name", title: "Title", manager: isMgr || !mgrs.length ? lead.id : mgrs[i % mgrs.length].id, access: isMgr ? "Captain" : "Member" };
     if (isMgr) mgrs.push(p);
     people.push(p);
   }
