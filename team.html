@@ -12,7 +12,8 @@
 /* My Team: team list | selected team (mission, people and the AI roles they look after) | person access panel.
    Shared tokens and shell live in shell.css. */
 .app.has-panel { grid-template-columns: 248px minmax(0, 1fr) 400px; }
-.acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.content { padding-top: 6px; }
+.ph { margin-bottom: 18px; }
 .btn.dashed { border-style: dashed; }
 .btn.danger { color: var(--bad); }
 .btn.sm { padding: 6px 11px; font-size: 13px; }
@@ -121,8 +122,8 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 }
 @media (max-width: 860px) {
   .app.has-panel { grid-template-columns: minmax(0, 1fr); }
-  .acts { width: 100%; }
-  .acts .btn { flex: 1; }
+  .content { padding-top: 10px; }
+  .top-right .btn.primary { padding: 8px 12px; font-size: 14px; }
   .stat { padding: 12px; }
   .stat span { min-height: 2.6em; }
   .split { grid-template-columns: minmax(0, 1fr); }
@@ -216,7 +217,6 @@ function render() {
   $("#content").innerHTML = `
     <div class="ph">
       <div><h1>Team Name</h1><p class="lede">Page description goes here.</p></div>
-      <div class="acts"><button class="btn primary" data-action="create-team">+ Create Team</button></div>
     </div>
     <div class="stats">
       <div class="stat"><span>Teams</span><b>${S.teams.length}</b><small>In your organization</small></div>
@@ -413,7 +413,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-Shell.mount("team");
+Shell.mount("team", { action: `<button class="btn primary" data-action="create-team">+ Create Team</button>` });
 render();
 </script>
 </body>
