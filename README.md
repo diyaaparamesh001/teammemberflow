@@ -8,7 +8,7 @@ down to phone.
 
 | File | Page |
 | --- | --- |
-| `index.html` | **Log in** (the first page): email and password. Logging in opens Home. |
+| `index.html` | **Log in** (the first page): Welcome to Flownt, continue with a work email, Google Workspace or Microsoft. Each opens Home. |
 | `home.html` | **Home**: a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
 | `team.html` | **My Team**: a team list on the left; the selected team shows its mission and its people with the AI roles each one looks after. Clicking a person opens their access. |
 | `workforce.html` | **AI Workforce**: total and active workflow counts, Create AI role, and a table of AI roles (role, purpose, owner, team, status) with team and status filters. Clicking a role shows its instructions, tools, owner, teams and missions. |

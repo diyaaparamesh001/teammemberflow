@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flownt Log in</title>
+<title>Flownt Welcome</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1f'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
@@ -18,7 +18,11 @@ body { display: grid; place-items: center; grid-template-columns: minmax(0, 400p
 .card label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
 .card input { border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 12px; background: var(--bg); font-weight: 400; }
 .card input:focus { border-color: var(--accent); outline: none; }
-.card .btn.primary { width: 100%; padding: 12px; margin-top: 4px; }
+.intro { display: flex; flex-direction: column; gap: 6px; }
+.desc { color: var(--muted); font-size: 15px; }
+.card .btn { width: 100%; padding: 12px; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line-soft); }
 .err { color: var(--bad); font-size: 13px; font-weight: 600; }
 @media (max-width: 480px) { .card { padding: 24px 20px; } }
 </style>
@@ -26,23 +30,26 @@ body { display: grid; place-items: center; grid-template-columns: minmax(0, 400p
 <body>
 <form class="card" id="login" novalidate>
   <div class="brand"><i></i>Flownt</div>
-  <h1>Log in</h1>
-  <label>Email<input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com"></label>
-  <label>Password<input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password"></label>
+  <div class="intro">
+    <h1>Welcome to Flownt</h1>
+    <p class="desc">Description goes here.</p>
+  </div>
+  <label>Work email address<input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com"></label>
   <span class="err" id="err" hidden></span>
-  <button class="btn primary" type="submit">Log in</button>
+  <button class="btn primary" type="submit">Continue with work email</button>
+  <div class="or"><span>Or</span></div>
+  <button class="btn" type="button" data-sso>Continue with Google Workspace</button>
+  <button class="btn" type="button" data-sso>Continue with Microsoft</button>
 </form>
 
 <script>
 const form = document.getElementById("login"), err = document.getElementById("err");
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-  const email = form.email.value.trim(), password = form.password.value;
-  const show = (m) => { err.textContent = m; err.hidden = false; };
-  if (!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.");
-  if (!password) return show("Enter your password.");
+  if (!/^\S+@\S+\.\S+$/.test(form.email.value.trim())) { err.textContent = "Enter a valid work email address."; err.hidden = false; return; }
   location.href = "home.html";
 });
+document.querySelectorAll("[data-sso]").forEach((b) => b.addEventListener("click", () => (location.href = "home.html")));
 </script>
 </body>
 </html>
