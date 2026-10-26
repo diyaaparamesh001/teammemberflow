@@ -9,12 +9,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* Home: chat history column | chat area (heading, message box, suggestion cards). A conversation docks the box at the bottom.
-   Shared shell lives in shell.css. */
-.content.chat-page { padding: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); overflow: hidden; }
+/* Home: page title, then one chat box — chat history column | chat panel (header, message box, suggestion cards).
+   A conversation docks the message box at the bottom. Shared shell lives in shell.css. */
+.content.home-page { display: flex; flex-direction: column; overflow: hidden; padding-bottom: 24px; }
+.page-title { font-size: 30px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 18px; }
+.chat-box { flex: 1; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); border: 1.5px solid var(--line-soft); border-radius: 14px; overflow: hidden; }
 
 /* Chat history */
-.history { border-right: 1px solid var(--line-soft); padding: 18px 12px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; background: var(--bg); }
+.history { border-right: 1px solid var(--line-soft); padding: 16px 12px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; background: var(--sunk); }
 .history .new { margin-bottom: 8px; justify-content: flex-start; }
 .h-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 5px; }
 .history a { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 14px; color: inherit; text-decoration: none; min-width: 0; }
@@ -25,11 +27,13 @@
 .history a.on i { border-color: var(--accent); }
 .hist-btn { display: none; }
 
-/* Chat area */
-.chat-area { overflow-y: auto; padding: 44px 40px 0; display: flex; flex-direction: column; }
-.chat { width: 100%; max-width: 860px; display: flex; flex-direction: column; flex: 1; padding-bottom: 40px; }
-.chat h1 { font-size: 32px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 20px; }
-.chat .lede { margin: -12px 0 20px; }
+/* Chat panel */
+.chat-panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line-soft); }
+.chat-head h2 { font-size: 20px; font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-body { flex: 1; overflow-y: auto; padding: 22px 24px 0; display: flex; flex-direction: column; }
+.chat { width: 100%; max-width: 860px; display: flex; flex-direction: column; flex: 1; padding-bottom: 24px; }
+.chat .lede { margin: 0 0 16px; }
 
 .composer { border: 1.5px solid var(--line); border-radius: 14px; background: var(--bg); padding: 18px 18px 14px 22px; display: flex; flex-direction: column; gap: 10px; min-height: 230px; }
 .composer:focus-within { border-color: var(--accent); }
@@ -52,7 +56,7 @@
 .msg.ai { align-self: flex-start; border: 1.5px solid var(--line-soft); border-bottom-left-radius: 4px; }
 .msg.ai small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
 .msg.typing { color: var(--muted); }
-.docked { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 20px; }
+.docked { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 18px; }
 .docked .composer { min-height: 0; flex-direction: row; align-items: flex-end; padding: 10px 10px 10px 18px; }
 .docked .composer textarea { min-height: 28px; max-height: 160px; padding: 9px 0; font-size: 16px; }
 
@@ -62,18 +66,19 @@
 .list a:last-child { border-bottom: 0; }
 .list a:hover { background: var(--sunk); }
 
-@media (max-width: 1100px) {
+@media (max-width: 1240px) {
   .cards { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .card { min-height: 0; }
 }
 @media (max-width: 860px) {
-  .content.chat-page { grid-template-columns: minmax(0, 1fr); }
+  .page-title { font-size: 25px; margin-bottom: 14px; }
+  .chat-box { grid-template-columns: minmax(0, 1fr); }
   .history { position: fixed; top: 0; bottom: 0; left: 0; width: 272px; z-index: 54; transform: translateX(-100%); transition: transform .2s; box-shadow: none;
     padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
   .history.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.2); }
-  .hist-btn { display: inline-flex; align-self: flex-start; margin-bottom: 14px; }
-  .chat-area { padding: 18px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
-  .chat h1 { font-size: 26px; }
+  .hist-btn { display: inline-flex; padding: 6px 10px; flex: none; }
+  .chat-head { padding: 12px 14px; }
+  .chat-body { padding: 16px 14px 0; }
   .composer { min-height: 190px; }
   .composer textarea { min-height: 100px; }
 }
@@ -84,9 +89,15 @@
   <aside class="sidebar" id="sidebar"></aside>
   <div class="main">
     <header class="topbar" id="topbar"></header>
-    <main class="content chat-page">
-      <nav class="history" id="history" aria-label="Chat history"></nav>
-      <div class="chat-area" id="chat-area"></div>
+    <main class="content home-page">
+      <h1 class="page-title">Home</h1>
+      <section class="chat-box">
+        <nav class="history" id="history" aria-label="Chat history"></nav>
+        <div class="chat-panel">
+          <div class="chat-head"><button class="btn hist-btn" data-hist aria-label="Chat history">☰</button><h2 id="chat-title">Chat</h2></div>
+          <div class="chat-body" id="chat-area"></div>
+        </div>
+      </section>
     </main>
   </div>
 </div>
@@ -128,7 +139,6 @@ function composer(placeholder, docked) {
     <button class="send" id="send" type="submit" aria-label="Send" disabled>↑</button>
   </form></div>`;
 }
-const histBtn = `<button class="btn hist-btn" data-hist>☰ Chat history</button>`;
 
 /* Views: new chat (no hash), a project (#project-…), or a conversation (#chat-…) */
 function render() {
@@ -136,19 +146,22 @@ function render() {
   const area = $("#chat-area");
   if (chat) {
     document.title = `${chat.title} · Flownt`;
-    area.innerHTML = `<div class="chat convo">${histBtn}<h1>${esc(chat.title)}</h1>
+    $("#chat-title").textContent = chat.title;
+    area.innerHTML = `<div class="chat convo">
       <div class="thread">${chat.messages.map(bubble).join("")}</div>
       ${composer("Reply to Flownt...", true)}</div>`;
     area.scrollTop = area.scrollHeight;
   } else if (project) {
     document.title = `${project.title} · Flownt`;
-    area.innerHTML = `<div class="chat">${histBtn}<h1>${esc(project.title)}</h1><p class="lede">Project description goes here.</p>
+    $("#chat-title").textContent = project.title;
+    area.innerHTML = `<div class="chat"><p class="lede">Project description goes here.</p>
       ${composer(`Message Flownt about ${project.title}...`)}
       <div class="list"><h2>Chats in this project</h2>
         ${[1, 2, 3].map((n) => `<a href="#" data-open-title="Chat title ${n}"><span>Chat title ${n}</span><span class="muted">Date</span></a>`).join("")}</div></div>`;
   } else {
     document.title = "Flownt Home";
-    area.innerHTML = `<div class="chat">${histBtn}<h1>Home</h1>
+    $("#chat-title").textContent = "Chat";
+    area.innerHTML = `<div class="chat">
       ${composer("Message Flownt...")}
       <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
   }
