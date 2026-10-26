@@ -8,32 +8,37 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <style>
-/* Layout: app shell — sidebar | main (teams list or one team's details). Wireframe greys, ink as the only accent. */
+/* Layout: app shell — sidebar | team list | team side sheet. Wireframe greys with muted status colours. */
 :root {
   --bg: #ffffff;
   --side: #f4f4f6;
-  --sunk: #f8f8fa;
-  --chip: #e6e6ea;
+  --sunk: #f7f7f9;
+  --chip: #e8e8ec;
   --line: #c4c4cb;
   --line-soft: #e2e2e7;
   --ink: #1a1a1f;
   --muted: #66666f;
   --scrim: rgba(20, 20, 26, .38);
+  --good: #2f7a4f; --good-bg: #e3f1e8;
+  --warn: #8a5a00; --warn-bg: #fbefd6;
+  --bad: #a3322b; --bad-bg: #f8e0de;
   --font: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 10px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #141417; --side: #1b1b1f; --sunk: #18181c; --chip: #2b2b31;
-    --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa;
-    --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+    --bg: #141417; --side: #1b1b1f; --sunk: #19191d; --chip: #2b2b31;
+    --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa; --scrim: rgba(0, 0, 0, .6);
+    --good: #7cc79a; --good-bg: #1d3326; --warn: #e5b45a; --warn-bg: #3a2e14; --bad: #f08a80; --bad-bg: #3d1f1c;
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #141417; --side: #1b1b1f; --sunk: #18181c; --chip: #2b2b31;
-  --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa;
-  --scrim: rgba(0, 0, 0, .6); color-scheme: dark;
+  --bg: #141417; --side: #1b1b1f; --sunk: #19191d; --chip: #2b2b31;
+  --line: #4a4a53; --line-soft: #2e2e35; --ink: #ededf0; --muted: #a0a0aa; --scrim: rgba(0, 0, 0, .6);
+  --good: #7cc79a; --good-bg: #1d3326; --warn: #e5b45a; --warn-bg: #3a2e14; --bad: #f08a80; --bad-bg: #3d1f1c;
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -41,126 +46,155 @@
 html, body { height: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4; }
 button, input, select { font: inherit; color: inherit; }
-button { cursor: pointer; background: none; border: 0; padding: 0; }
+button { cursor: pointer; background: none; border: 0; padding: 0; text-align: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+h1, h2, h3, p { margin: 0; }
 
-.app { display: grid; grid-template-columns: 260px minmax(0, 1fr); height: 100%; }
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100%; }
+.app.has-panel { grid-template-columns: 248px minmax(0, 1fr) 420px; }
 
 /* Sidebar */
-.sidebar { background: var(--side); border-right: 1px solid var(--line-soft); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; padding: 0 8px 20px; }
-.brand i { width: 28px; height: 28px; border-radius: 7px; background: var(--ink); display: block; }
-.nav { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 8px; font-size: 16px; text-align: left; width: 100%; }
-.nav i { width: 20px; height: 20px; border: 1.5px solid var(--muted); border-radius: 5px; flex: none; }
+.sidebar { background: var(--side); border-right: 1px solid var(--line-soft); padding: 22px 14px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 21px; padding: 0 8px 18px; }
+.brand i { width: 26px; height: 26px; border-radius: 7px; background: var(--ink); display: block; }
+.nav { display: flex; align-items: center; gap: 13px; padding: 11px 13px; border-radius: 8px; font-size: 15px; width: 100%; }
+.nav i { width: 19px; height: 19px; border: 1.5px solid var(--muted); border-radius: 5px; flex: none; }
 .nav:hover { background: var(--chip); }
-.nav.on { background: var(--chip); font-weight: 600; }
+.nav.on { background: var(--chip); font-weight: 700; }
 
 /* Main */
 .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-.topbar { display: flex; align-items: center; gap: 16px; padding: 16px 40px; border-bottom: 1px solid var(--line-soft); }
-.menu-btn { display: none; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; }
-.search { position: relative; flex: 1; max-width: 520px; }
-.search input { width: 100%; border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 60px 11px 16px; background: var(--bg); }
-.search kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 600 12px var(--font); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: var(--muted); }
-.results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; z-index: 30; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
-.results button { display: flex; justify-content: space-between; gap: 12px; width: 100%; text-align: left; padding: 9px 10px; border-radius: 6px; }
-.results button:hover, .results button.hl { background: var(--chip); }
-.results small { color: var(--muted); }
-.results p { padding: 10px; color: var(--muted); margin: 0; }
-.me { margin-left: auto; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--chip); font-weight: 800; font-size: 14px; flex: none; }
+.topbar { display: flex; align-items: center; gap: 14px; padding: 14px 32px; border-bottom: 1px solid var(--line-soft); }
+.menu-btn { display: none; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; place-items: center; }
+.search { flex: 1; max-width: 460px; border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+.top-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.needs-btn { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--line); border-radius: 99px; padding: 8px 10px 8px 15px; font-weight: 600; white-space: nowrap; }
+.needs-btn b { background: var(--ink); color: var(--bg); border-radius: 99px; min-width: 22px; height: 22px; display: grid; place-items: center; font-size: 12px; padding: 0 6px; }
+.me { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--chip); flex: none; }
 
-.content { overflow-y: auto; padding: 36px 40px 56px; flex: 1; }
-.wrap { max-width: 960px; }
-.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
-h1 { font-size: 32px; font-weight: 800; margin: 0 0 6px; letter-spacing: -.01em; text-wrap: balance; }
-.lede { color: var(--muted); margin: 0; font-size: 17px; }
-.btn { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 18px; font-weight: 600; background: var(--bg); white-space: nowrap; }
+.content { overflow-y: auto; padding: 30px 32px 56px; flex: 1; }
+.ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.ph h1 { font-size: 30px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 4px; }
+.lede { color: var(--muted); font-size: 16px; }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 16px; font-weight: 600; background: var(--bg); white-space: nowrap; }
 .btn:hover { border-color: var(--ink); }
 .btn.primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .btn.primary:hover { opacity: .88; }
-.back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 600; margin-bottom: 18px; }
-.back:hover { color: var(--ink); }
+.btn.dashed { border-style: dashed; width: 100%; justify-content: flex-start; }
+.btn.danger { color: var(--bad); }
+.btn.sm { padding: 6px 11px; font-size: 13px; }
 
-/* Lists */
-.list { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow: hidden; }
+/* Team table */
+.tw { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow-x: auto; }
+.tname, td.meta, td .who { white-space: nowrap; }
 table { border-collapse: collapse; width: 100%; }
-th, td { text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
-th { font-size: 13px; font-weight: 600; color: var(--muted); background: var(--sunk); }
+th, td { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; font-size: 14px; }
+th { font-size: 12px; font-weight: 700; color: var(--muted); background: var(--sunk); white-space: nowrap; }
 tbody tr:last-child td { border-bottom: 0; }
 tr.click { cursor: pointer; }
 tr.click:hover td { background: var(--sunk); }
 tr.click:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
-tr.new td { animation: flash 1.6s ease-out; }
-@keyframes flash { from { background: var(--chip); } to { background: transparent; } }
-.team-name { font-weight: 800; font-size: 16px; }
+tr.sel td { background: var(--sunk); }
+tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--ink); }
+.tname { font-weight: 800; font-size: 15px; }
+.chev { color: var(--muted); text-align: right; width: 36px; }
+.who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--chip); display: inline-grid; place-items: center; font-weight: 800; font-size: 11px; flex: none; }
+.av.lg { width: 48px; height: 48px; font-size: 16px; }
+.av.ai { border-radius: 8px; background: var(--bg); border: 1.5px dashed var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { display: inline-flex; align-items: center; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; white-space: nowrap; background: var(--chip); }
+.tag.good { color: var(--good); background: var(--good-bg); }
+.tag.warn { color: var(--warn); background: var(--warn-bg); }
+.tag.bad { color: var(--bad); background: var(--bad-bg); }
+.tag.line { background: none; border: 1.5px solid var(--line); }
 .muted { color: var(--muted); }
-.chev { color: var(--muted); text-align: right; width: 40px; }
-.person { display: flex; align-items: center; gap: 12px; }
-.av { width: 36px; height: 36px; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-weight: 800; font-size: 13px; flex: none; }
-.av.lg { width: 64px; height: 64px; border-radius: 16px; font-size: 22px; }
-.chip { display: inline-block; border: 1.5px solid var(--ink); border-radius: 5px; padding: 0 7px; font-weight: 800; font-size: 12px; margin-left: 8px; vertical-align: 1px; }
-.num { font-variant-numeric: tabular-nums; }
-.link { font-weight: 600; font-size: 14px; text-decoration: underline; text-underline-offset: 2px; color: var(--muted); }
-.link:hover { color: var(--ink); }
 
-/* Team details */
-.team-head { display: flex; gap: 18px; align-items: center; }
-.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; }
-.fact { border: 1.5px solid var(--line-soft); border-radius: var(--r); padding: 14px 18px; }
-.fact span { display: block; font-size: 13px; color: var(--muted); }
-.fact b { font-size: 18px; font-weight: 800; }
-.sec-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
-.sec-head h2 { font-size: 18px; font-weight: 800; margin: 0; }
-
-.placeholder { border: 1.5px dashed var(--line); border-radius: 14px; padding: 60px 24px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.placeholder h2 { color: var(--ink); margin: 0; font-size: 22px; }
+/* Side sheet */
+.panel { border-left: 1px solid var(--line-soft); display: flex; flex-direction: column; min-width: 0; background: var(--bg); overflow: hidden; }
+.p-head { display: flex; align-items: center; gap: 14px; padding: 22px 22px 0; }
+.p-head h2 { font-size: 20px; font-weight: 800; }
+.p-head small { color: var(--muted); font-size: 14px; }
+.p-head .x { margin-left: auto; width: 40px; height: 40px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 18px; flex: none; display: grid; place-items: center; }
+.tabs { display: flex; gap: 20px; border-bottom: 1.5px solid var(--line-soft); padding: 0 22px; margin-top: 18px; overflow-x: auto; }
+.tab { padding: 10px 0; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
+.tab.on { color: var(--ink); font-weight: 800; border-color: var(--ink); }
+.p-body { overflow-y: auto; padding: 16px 22px 28px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.item { display: flex; align-items: center; gap: 12px; padding: 10px; margin: 0 -10px; border-radius: 8px; width: calc(100% + 20px); }
+button.item:hover { background: var(--sunk); }
+.item .tx { flex: 1; min-width: 0; }
+.item .tx b { display: block; font-weight: 700; }
+.item .tx small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar { height: 6px; background: var(--chip); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.bar i { display: block; height: 100%; background: var(--ink); }
+.sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.sum div { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; }
+.sum span { display: block; font-size: 12px; color: var(--muted); }
+.sum b { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.level { border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 12px 14px; margin-bottom: 4px; }
+.level b { display: block; margin-bottom: 2px; }
+.level small { color: var(--muted); font-size: 13px; }
+.sec-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 10px 0 2px; }
+select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5px 8px; background: var(--bg); font-size: 13px; }
 
 /* Modal + toast */
-.scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 50; padding: 16px; }
-.modal { background: var(--bg); border-radius: 14px; width: 440px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
-.modal h2 { margin: 0; font-size: 20px; font-weight: 800; }
-.modal p { margin: 0; color: var(--muted); font-size: 14px; }
-.modal label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
-.modal input, .modal select { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; }
-.modal .err { font-weight: 600; font-size: 13px; }
-.modal .foot { display: flex; justify-content: flex-end; gap: 10px; }
-.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 8px; font-weight: 600; z-index: 60; max-width: calc(100vw - 32px); }
+.scrim { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 60; padding: 16px; }
+.modal { background: var(--bg); border-radius: 14px; width: 460px; max-width: 100%; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-size: 20px; font-weight: 800; }
+.modal .intro { color: var(--muted); font-size: 14px; }
+.modal label.f { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+.modal input[type=text], .modal select { border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); font-weight: 400; width: 100%; }
+.choice { display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; cursor: pointer; font-weight: 400; }
+.choice:has(input:checked) { border-color: var(--ink); }
+.choice input { margin-top: 3px; }
+.choice b { display: block; font-size: 14px; }
+.choice small { color: var(--muted); font-size: 13px; }
+.modal .err { color: var(--bad); font-weight: 600; font-size: 13px; }
+.modal .foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.modal .foot .left { margin-right: auto; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 8px; font-weight: 600; z-index: 80; max-width: calc(100vw - 32px); }
 
 /* Responsive */
-@media (max-width: 820px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
-  .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; z-index: 45; transform: translateX(-100%); transition: transform .2s;
-    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-top: calc(24px + env(safe-area-inset-top, 0px)); }
-  .sidebar.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.18); }
-  .menu-btn { display: grid; place-items: center; }
+@media (max-width: 1180px) {
+  .app.has-panel { grid-template-columns: 248px minmax(0, 1fr); }
+  .panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 50; box-shadow: -10px 0 40px rgba(0,0,0,.18);
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+}
+@media (max-width: 860px) {
+  .app, .app.has-panel { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 260px; z-index: 55; transform: translateX(-100%); transition: transform .2s;
+    padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-top: calc(22px + env(safe-area-inset-top, 0px)); }
+  .sidebar.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.2); }
+  .menu-btn { display: grid; }
   .topbar, .content { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .topbar { gap: 10px; padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; }
-  .content { padding-top: 24px; }
-  .search kbd { display: none; }
-  .search input { padding-right: 14px; }
-  .me { width: 40px; height: 40px; }
-  h1 { font-size: 26px; }
-  .head .btn { width: 100%; }
-  .facts { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .av.lg { width: 52px; height: 52px; font-size: 18px; }
+  .topbar { gap: 8px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
+  .content { padding-top: 22px; }
+  .needs-btn { padding: 7px 9px; }
+  .needs-btn .lbl { display: none; }
+  .me { width: 38px; height: 38px; }
+  .ph h1 { font-size: 25px; }
+  .acts { width: 100%; }
+  .acts .btn { flex: 1; }
 
-  /* Tables become stacked rows */
+  /* Team table becomes stacked rows */
   thead { display: none; }
   table, tbody, tr, td { display: block; }
-  tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
+  tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
   tbody tr:last-child { border-bottom: 0; }
-  td { padding: 0; border: 0; grid-column: 1; min-width: 0; }
-  td.chev, td.side { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
-  tr.click:hover { background: var(--sunk); }
-  tr.click:hover td { background: none; }
-  td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); }
-  td.email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+  td { padding: 0; border: 0; grid-column: 1; }
+  td.chev { grid-column: 2; grid-row: 1 / span 4; align-self: center; }
+  tr.click:hover td, tr.sel td { background: none; }
+  tr.sel { background: var(--sunk); box-shadow: inset 3px 0 0 var(--ink); }
+  tr.sel td:first-child { box-shadow: none; }
+  td.meta { color: var(--muted); font-size: 13px; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><i></i>Flownt</div>
     <nav id="nav"></nav>
@@ -169,247 +203,328 @@ tr.new td { animation: flash 1.6s ease-out; }
   <div class="main">
     <header class="topbar">
       <button class="menu-btn" data-action="menu" aria-label="Open menu">☰</button>
-      <div class="search">
-        <input id="q" type="text" placeholder="Search teams and people..." autocomplete="off" aria-label="Search teams and people">
-        <kbd>⌘K</kbd>
-        <div class="results" id="results" hidden></div>
+      <div class="search muted">Search or jump to…</div>
+      <div class="top-right">
+        <button class="needs-btn" data-action="todo" data-what="Needs You"><span class="lbl">Needs You</span> <b>X</b></button>
+        <button class="me" aria-label="Your account" data-action="todo" data-what="Your account"></button>
       </div>
-      <button class="me" aria-label="Your account" data-action="todo" data-what="Your account">YU</button>
     </header>
     <main class="content" id="content"></main>
   </div>
+
+  <aside class="panel" id="panel" hidden></aside>
 </div>
 <div id="modal-root"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
-const m = (name, role) => ({ id: "u" + Math.random().toString(36).slice(2, 9), name, role });
-const S = {
-  nav: "teams",
-  justCreated: null,
-  teams: [
-    { id: "engineering", name: "Engineering", about: "Builds and runs the Flownt platform.", created: "Mar 2023", members: [
-      m("Sarah Lee", "Engineering Manager"), m("David Chen", "Staff Engineer"), m("Priya Nair", "Senior Frontend Engineer"),
-      m("Marcus Johnson", "Backend Engineer"), m("Elena Rossi", "Backend Engineer"), m("Tom Becker", "DevOps Engineer"),
-      m("Aisha Rahman", "Frontend Engineer"), m("Kenji Tanaka", "Mobile Engineer"), m("Lucas Silva", "QA Engineer"),
-      m("Nora Fischer", "Data Engineer"), m("Omar Haddad", "Software Engineer"), m("Grace Park", "Software Engineer"),
-    ] },
-    { id: "product-design", name: "Product Design", about: "Designs how Flownt looks, feels and works.", created: "Jun 2023", members: [
-      m("Arjun Kumar", "Design Lead"), m("Chloe Martin", "Senior Product Designer"), m("Diego Alvarez", "Product Designer"),
-      m("Hannah Wright", "UX Researcher"), m("Ravi Patel", "Visual Designer"), m("Zoe Kim", "Content Designer"),
-    ] },
-    { id: "marketing", name: "Marketing", about: "Tells the world about Flownt and grows its audience.", created: "Sep 2023", members: [
-      m("Maya Thomas", "Marketing Lead"), m("Ben Carter", "Growth Marketer"), m("Fatima Ali", "Content Strategist"),
-      m("Liam O'Brien", "SEO Specialist"), m("Sofia Garcia", "Social Media Manager"), m("Jack Wilson", "Product Marketing Manager"),
-      m("Mei Lin", "Brand Designer"), m("Noah Brooks", "Marketing Analyst"),
-    ] },
-  ],
+const ACCESS = {
+  Admin: "Manages the team, its people, AI roles and access.",
+  Manager: "Manages their reports and approves AI role work.",
+  Member: "Works on missions and uses the team's AI roles.",
 };
-S.teams.forEach((t) => (t.lead = t.members[0].id));
+const MODES = {
+  suggest: ["Suggests", "Drafts work for a person to review."],
+  approval: ["Acts with approval", "Does the work once a person approves it."],
+  auto: ["Acts on its own", "Does the work and reports back."],
+};
+const STATUS = { good: "On track", warn: "At risk", bad: "Blocked" };
+
+let uid = 1;
+const id = () => "x" + uid++;
+function makeTeam(letter, size, roles, missions) {
+  const people = [];
+  const lead = { id: id(), name: "Person name", title: "Title", manager: null, access: "Admin" };
+  people.push(lead);
+  const mgrs = [];
+  for (let i = 1; i < size; i++) {
+    const isMgr = i <= 2 && size > 6;
+    const p = { id: id(), name: "Person name", title: "Title", manager: isMgr || !mgrs.length ? lead.id : mgrs[i % mgrs.length].id, access: isMgr ? "Manager" : "Member" };
+    if (isMgr) mgrs.push(p);
+    people.push(p);
+  }
+  return {
+    id: "team-" + letter.toLowerCase(), name: "Team " + letter, people, lead: lead.id,
+    roles: roles.map((mode, i) => ({ id: id(), name: "AI role " + (i + 1), mode, owner: people[(i + 1) % people.length].id })),
+    missions: missions.map((status, i) => ({ id: id(), title: "Mission title", status, owner: people[i % people.length].id, progress: [60, 35, 20, 80][i % 4] })),
+  };
+}
+const S = {
+  teams: [
+    makeTeam("A", 12, ["approval", "auto", "suggest"], ["good", "good", "warn", "bad"]),
+    makeTeam("B", 6, ["suggest", "approval"], ["good", "good", "warn"]),
+    makeTeam("C", 8, ["suggest", "auto"], ["good", "warn", "bad"]),
+  ],
+  selected: matchMedia("(min-width: 1181px)").matches ? "team-a" : null,
+  tab: "people",
+};
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const initials = (n) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-const email = (n) => n.toLowerCase().replace(/[^a-z\s]/g, "").trim().replace(/\s+/g, ".") + "@flownt.com";
-const members = (n) => `${n} member${n === 1 ? "" : "s"}`;
-const team = (id) => S.teams.find((t) => t.id === id);
-const leadOf = (t) => t.members.find((x) => x.id === t.lead);
-const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "team";
+const initials = (n) => n.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const team = (tid) => S.teams.find((t) => t.id === tid);
+const person = (t, pid) => t.people.find((p) => p.id === pid);
+const leadOf = (t) => person(t, t.lead);
+// Placeholder names repeat, so pickers number people in list order.
+const label = (t, p) => `${p.name} ${t.people.indexOf(p) + 1}${p.title ? " · " + p.title : ""}`;
+const peopleOptions = (t, sel, exclude = []) => t.people.filter((p) => !exclude.includes(p.id))
+  .map((p) => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(label(t, p))}</option>`).join("");
 
 function toast(msg) {
-  const t = $("#toast"); t.textContent = msg; t.hidden = false;
-  clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 2600);
+  const el = $("#toast"); el.textContent = msg; el.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), 2400);
 }
 
-/* ---------- Routing: #team-<id> opens a team, anything else shows the list ---------- */
-const route = () => { const h = location.hash.slice(1); return h.startsWith("team-") ? h.slice(5) : null; };
-const go = (hash) => { if (location.hash.slice(1) !== hash) location.hash = hash; else render(); };
-window.addEventListener("hashchange", () => { S.nav = "teams"; render(); $("#content").scrollTop = 0; });
+function health(t) {
+  const n = (s) => t.missions.filter((m) => m.status === s).length;
+  const out = [["good", "on track"], ["warn", "at risk"], ["bad", "blocked"]].filter(([s]) => n(s)).map(([s, l]) => `<span class="tag ${s}">${n(s)} ${l}</span>`).join("");
+  return out || `<span class="muted">No missions</span>`;
+}
 
 /* ---------- Render ---------- */
 function render() {
-  renderNav();
-  const c = $("#content");
-  if (S.nav !== "teams") { c.innerHTML = placeholder(); return; }
-  const t = team(route());
-  c.innerHTML = t ? teamView(t) : listView();
-  document.title = t ? `${t.name} · Flownt` : "Flownt My Teams";
-}
+  $("#nav").innerHTML = ["Home", "Needs You", "My Teams", "AI Workforce", "Missions", "Outcomes"]
+    .map((n) => `<button class="nav ${n === "My Teams" ? "on" : ""}" data-action="${n === "My Teams" ? "home" : "todo"}" data-what="${n}"><i></i>${n}</button>`).join("");
 
-function renderNav() {
-  const items = [["home", "Home"], ["needs", "Needs You"], ["teams", "My Teams"], ["workforce", "AI Workforce"], ["missions", "Missions"], ["outcomes", "Outcomes"]];
-  $("#nav").innerHTML = items.map(([k, l]) => `<button class="nav ${S.nav === k ? "on" : ""}" data-action="nav" data-k="${k}"><i></i>${l}</button>`).join("");
-}
-
-function placeholder() {
-  const label = { home: "Home", needs: "Needs You", workforce: "AI Workforce", missions: "Missions", outcomes: "Outcomes" }[S.nav];
-  return `<div class="wrap"><h1>${label}</h1><p class="lede" style="margin-bottom:24px">This screen isn't part of the prototype yet.</p>
-    <div class="placeholder"><h2>${label} goes here</h2><p>Only My Teams is clickable in this prototype.</p>
-    <button class="btn primary" data-action="nav" data-k="teams">Go to My Teams</button></div></div>`;
-}
-
-function listView() {
-  return `<div class="wrap">
-    <div class="head">
-      <div><h1>My Teams</h1><p class="lede">Manage the teams in your organization.</p></div>
-      <button class="btn primary" data-action="create">+ Create Team</button>
+  $("#content").innerHTML = `
+    <div class="ph">
+      <div><h1>My Teams</h1><p class="lede">Page description goes here.</p></div>
+      <div class="acts"><button class="btn" data-action="set-role">Set up AI role</button><button class="btn primary" data-action="create-team">+ Create Team</button></div>
     </div>
-    <div class="list"><table>
-      <thead><tr><th>Team</th><th>Team Lead</th><th>Members</th><th class="chev"><span hidden>Open</span></th></tr></thead>
-      <tbody>${S.teams.map((t) => `
-        <tr class="click ${S.justCreated === t.id ? "new" : ""}" tabindex="0" data-action="open" data-id="${t.id}" aria-label="Open ${esc(t.name)}">
-          <td class="team-name">${esc(t.name)}</td>
-          <td data-label="Lead">${esc(leadOf(t).name)}</td>
-          <td class="muted num">${members(t.members.length)}</td>
+    <div class="tw"><table>
+      <thead><tr><th>Team</th><th>Team lead</th><th>Members</th><th>AI roles</th><th>Missions</th><th class="chev"></th></tr></thead>
+      <tbody>${S.teams.map((t) => {
+        const l = leadOf(t);
+        return `<tr class="click ${S.selected === t.id ? "sel" : ""}" tabindex="0" data-action="open" data-id="${t.id}" aria-label="Open ${esc(t.name)}">
+          <td class="tname">${esc(t.name)}</td>
+          <td><span class="who"><span class="av">${esc(initials(l.name))}</span>${esc(l.name)}</span></td>
+          <td class="meta">${plural(t.people.length, "member")}</td>
+          <td class="meta">${plural(t.roles.length, "role")}</td>
+          <td><span class="tags">${health(t)}</span></td>
           <td class="chev" aria-hidden="true">›</td>
-        </tr>`).join("")}
-      </tbody>
-    </table></div>
-  </div>`;
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>`;
+  renderPanel();
 }
 
-function teamView(t) {
+function renderPanel() {
+  const t = team(S.selected), panel = $("#panel");
+  $("#app").classList.toggle("has-panel", !!t);
+  panel.hidden = !t;
+  if (!t) return;
+  const tabs = [["people", "People"], ["roles", "AI roles"], ["missions", "Missions"], ["access", "Access"]];
+  panel.innerHTML = `
+    <div class="p-head"><span class="av lg">${esc(t.name.replace(/^Team\s+/, "").slice(0, 2).toUpperCase())}</span>
+      <div><h2>${esc(t.name)}</h2><small>Led by ${esc(leadOf(t).name)} · ${plural(t.people.length, "member")}</small></div>
+      <button class="x" data-action="close" aria-label="Close">✕</button></div>
+    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab ${S.tab === k ? "on" : ""}" role="tab" aria-selected="${S.tab === k}" data-action="tab" data-k="${k}">${l}</button>`).join("")}</div>
+    <div class="p-body">${({ people: peopleTab, roles: rolesTab, missions: missionsTab, access: accessTab })[S.tab](t)}</div>`;
+}
+
+function peopleTab(t) {
   const lead = leadOf(t);
-  const sorted = [lead, ...t.members.filter((x) => x.id !== t.lead)];
-  return `<div class="wrap">
-    <button class="back" data-action="back">‹ My Teams</button>
-    <div class="head">
-      <div class="team-head"><span class="av lg">${esc(initials(t.name))}</span>
-        <div><h1>${esc(t.name)}</h1><p class="lede">${esc(t.about)}</p></div></div>
-      <button class="btn primary" data-action="add-member" data-id="${t.id}">+ Add member</button>
-    </div>
-    <div class="facts">
-      <div class="fact"><span>Team lead</span><b>${esc(lead.name)}</b></div>
-      <div class="fact"><span>Members</span><b class="num">${t.members.length}</b></div>
-      <div class="fact"><span>Created</span><b>${esc(t.created)}</b></div>
-    </div>
-    <div class="sec-head"><h2>Members</h2></div>
-    <div class="list"><table>
-      <thead><tr><th>Name</th><th>Role</th><th>Email</th><th><span hidden>Actions</span></th></tr></thead>
-      <tbody>${sorted.map((x) => `
-        <tr>
-          <td><div class="person"><span class="av">${esc(initials(x.name))}</span><span><b>${esc(x.name)}</b>${x.id === t.lead ? `<span class="chip">Lead</span>` : ""}</span></div></td>
-          <td class="muted">${esc(x.role)}</td>
-          <td class="muted email">${esc(email(x.name))}</td>
-          <td class="side" style="text-align:right">${x.id === t.lead ? "" : `<button class="link" data-action="make-lead" data-team="${t.id}" data-id="${x.id}">Make lead</button>`}</td>
-        </tr>`).join("")}
-      </tbody>
-    </table></div>
-  </div>`;
+  const ordered = [lead, ...t.people.filter((p) => p !== lead)];
+  return ordered.map((p) => {
+    const mgr = person(t, p.manager);
+    return `<button class="item" data-action="edit-person" data-id="${p.id}">
+      <span class="av">${esc(initials(p.name))}</span>
+      <span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}${mgr ? ` · reports to ${esc(mgr.name)}` : p === lead ? " · team lead" : ""}</small></span>
+      <span class="tag">${p.access}</span></button>`;
+  }).join("") + `<button class="btn dashed" data-action="add-person" style="margin-top:8px">+ Add person</button>`;
+}
+
+function rolesTab(t) {
+  return (t.roles.length ? t.roles.map((r) => `<button class="item" data-action="edit-role" data-id="${r.id}">
+      <span class="av ai">AI</span>
+      <span class="tx"><b>${esc(r.name)}</b><small>Accountable: ${esc(person(t, r.owner)?.name || "Nobody")}</small></span>
+      <span class="tag line">${MODES[r.mode][0]}</span></button>`).join("")
+    : `<p class="muted">No AI roles on this team yet.</p>`) + `<button class="btn dashed" data-action="set-role" data-team="${t.id}" style="margin-top:8px">+ Turn on AI role</button>`;
+}
+
+function missionsTab(t) {
+  return (t.missions.length ? t.missions.map((m) => `<button class="item" data-action="edit-mission" data-id="${m.id}">
+      <span class="tx"><b>${esc(m.title)}</b><small>Owner: ${esc(person(t, m.owner)?.name || "Nobody")} · ${m.progress}%</small><div class="bar"><i style="width:${m.progress}%"></i></div></span>
+      <span class="tag ${m.status}">${STATUS[m.status]}</span></button>`).join("")
+    : `<p class="muted">No missions yet.</p>`) + `<button class="btn dashed" data-action="add-mission" style="margin-top:8px">+ Add mission</button>`;
+}
+
+function accessTab(t) {
+  const count = (lvl) => t.people.filter((p) => p.access === lvl).length;
+  return `<div class="sum">${Object.keys(ACCESS).map((l) => `<div><span>${l}s</span><b>${count(l)}</b></div>`).join("")}</div>
+    ${Object.entries(ACCESS).map(([l, d]) => `<div class="level"><b>${l}</b><small>${d}</small></div>`).join("")}
+    <div class="sec-label">People</div>
+    ${t.people.map((p) => `<div class="item"><span class="av">${esc(initials(p.name))}</span><span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}</small></span>
+      <select class="inline" data-action="set-access" data-id="${p.id}" aria-label="Access for ${esc(label(t, p))}" ${p.id === t.lead ? "disabled" : ""}>
+        ${Object.keys(ACCESS).map((l) => `<option ${p.access === l ? "selected" : ""}>${l}</option>`).join("")}</select></div>`).join("")}`;
 }
 
 /* ---------- Modals ---------- */
-function modal({ title, intro = "", fields, submit, onSubmit }) {
+function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
   $("#modal-root").innerHTML = `<div class="scrim" data-action="scrim"><form class="modal" id="mform" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-    <h2>${esc(title)}</h2>${intro ? `<p>${intro}</p>` : ""}${fields}
+    <h2>${esc(title)}</h2>${intro ? `<p class="intro">${intro}</p>` : ""}${fields}
     <span class="err" id="merr" hidden></span>
-    <div class="foot"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn primary" type="submit">${esc(submit)}</button></div>
+    <div class="foot">${extra}<button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn primary" type="submit">${esc(submit)}</button></div>
   </form></div>`;
   const f = $("#mform");
-  f.querySelector("input")?.focus();
+  f.querySelector("input[type=text], select")?.focus();
   f.addEventListener("submit", (e) => {
     e.preventDefault();
     const err = onSubmit(Object.fromEntries(new FormData(f)));
     if (err) { const el = $("#merr"); el.textContent = err; el.hidden = false; return; }
-    closeModal();
+    closeModal(); render();
   });
 }
 const closeModal = () => ($("#modal-root").innerHTML = "");
+const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${Object.keys(ACCESS).map((l) => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("")}</select>`;
+const modeChoices = (sel = "suggest") => Object.entries(MODES).map(([k, [l, d]]) =>
+  `<label class="choice"><input type="radio" name="mode" value="${k}" ${k === sel ? "checked" : ""}><span><b>${l}</b><small>${d}</small></span></label>`).join("");
 
 function createTeam() {
+  const next = "Team " + String.fromCharCode(65 + S.teams.length);
   modal({
-    title: "Create team", submit: "Create team",
-    intro: "You can add more members after the team is created.",
-    fields: `<label>Team name<input id="m-name" name="name" type="text" placeholder="e.g. Customer Success"></label>
-      <label>Team lead<input id="m-lead" name="lead" type="text" placeholder="Full name"></label>
-      <label>Lead's role<input id="m-role" name="role" type="text" placeholder="e.g. Customer Success Lead"></label>`,
+    title: "Create team", submit: "Create team", intro: "You can add people, AI roles and missions after it's created.",
+    fields: `<label class="f">Team name<input id="m-tname" name="name" type="text" value="${next}"></label>
+      <label class="f">Team lead<input id="m-tlead" name="lead" type="text" value="Person name"></label>`,
     onSubmit: (d) => {
-      const name = d.name.trim(), lead = d.lead.trim();
-      if (!name) return "Enter a team name.";
-      if (S.teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) return `There's already a team called ${name}.`;
-      if (!lead) return "Enter the team lead's name.";
-      let id = slug(name); while (team(id)) id += "-2";
-      const first = m(lead, d.role.trim() || "Team Lead");
-      S.teams.push({ id, name, about: "A new team.", created: "Today", members: [first], lead: first.id });
-      S.justCreated = id;
-      go("");
+      const name = d.name.trim(); if (!name) return "Enter a team name.";
+      if (S.teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) return "A team with that name already exists.";
+      const lead = { id: id(), name: d.lead.trim() || "Person name", title: "Title", manager: null, access: "Admin" };
+      const t = { id: "team-" + id(), name, people: [lead], lead: lead.id, roles: [], missions: [] };
+      S.teams.push(t); S.selected = t.id; S.tab = "people";
       toast(`Created ${name}`);
     },
   });
 }
 
-function addMember(teamId) {
-  const t = team(teamId);
+function addPerson() {
+  const t = team(S.selected);
   modal({
-    title: `Add member to ${t.name}`, submit: "Add member",
-    fields: `<label>Name<input id="m-mname" name="name" type="text" placeholder="Full name"></label>
-      <label>Role<input id="m-mrole" name="role" type="text" placeholder="e.g. Software Engineer"></label>`,
+    title: `Add person to ${t.name}`, submit: "Add person",
+    fields: `<label class="f">Name<input id="m-pname" name="name" type="text" value="Person name"></label>
+      <label class="f">Title<input id="m-ptitle" name="title" type="text" value="Title"></label>
+      <label class="f">Reports to<select id="m-pmgr" name="manager">${peopleOptions(t, t.lead)}</select></label>
+      <label class="f">Access${accessSelect()}</label>`,
     onSubmit: (d) => {
-      const name = d.name.trim();
-      if (!name) return "Enter a name.";
-      t.members.push(m(name, d.role.trim() || "Team member"));
-      render(); toast(`Added ${name} to ${t.name}`);
+      t.people.push({ id: id(), name: d.name.trim() || "Person name", title: d.title.trim() || "Title", manager: d.manager, access: d.access });
+      S.tab = "people"; toast("Person added");
     },
   });
 }
 
-/* ---------- Search ---------- */
-let hits = [], hl = 0;
-function search() {
-  const q = $("#q").value.trim().toLowerCase(), box = $("#results");
-  if (!q) { box.hidden = true; return; }
-  hits = [
-    ...S.teams.filter((t) => t.name.toLowerCase().includes(q)).map((t) => ({ label: t.name, sub: `Team · ${members(t.members.length)}`, go: t.id })),
-    ...S.teams.flatMap((t) => t.members.filter((x) => (x.name + " " + x.role).toLowerCase().includes(q)).map((x) => ({ label: x.name, sub: `${x.role} · ${t.name}`, go: t.id }))),
-  ].slice(0, 8);
-  hl = 0;
-  box.innerHTML = hits.length ? hits.map((h, i) => `<button data-action="hit" data-i="${i}" class="${i === hl ? "hl" : ""}"><span>${esc(h.label)}</span><small>${esc(h.sub)}</small></button>`).join("") : `<p>Nothing matches "${esc(q)}".</p>`;
-  box.hidden = false;
+function editPerson(pid) {
+  const t = team(S.selected), p = person(t, pid), isLead = pid === t.lead;
+  const below = (x) => t.people.filter((q) => q.manager === x).flatMap((q) => [q.id, ...below(q.id)]);
+  modal({
+    title: "Edit person", submit: "Save",
+    fields: `<label class="f">Name<input id="m-ename" name="name" type="text" value="${esc(p.name)}"></label>
+      <label class="f">Title<input id="m-etitle" name="title" type="text" value="${esc(p.title)}"></label>
+      ${isLead ? `<p class="intro">This person leads ${esc(t.name)} and doesn't report to anyone on the team.</p>`
+        : `<label class="f">Reports to<select id="m-emgr" name="manager">${peopleOptions(t, p.manager, [pid, ...below(pid)])}</select></label>
+      <label class="f">Access${accessSelect(p.access)}</label>`}`,
+    extra: isLead ? "" : `<button type="button" class="btn danger left" data-action="remove-person" data-id="${pid}">Remove</button>`,
+    onSubmit: (d) => {
+      p.name = d.name.trim() || "Person name"; p.title = d.title.trim() || "Title";
+      if (!isLead) { p.manager = d.manager; p.access = d.access; }
+      toast("Saved");
+    },
+  });
 }
-function pickHit(i) { const h = hits[i]; if (!h) return; $("#q").value = ""; $("#q").blur(); $("#results").hidden = true; S.nav = "teams"; go("team-" + h.go); }
+
+function setRole(teamId) {
+  const t = team(teamId || S.selected) || S.teams[0];
+  modal({
+    title: "Set up AI role", submit: "Turn on", intro: "Choose a team, then decide how the AI role takes part in the work.",
+    fields: `<label class="f">Team<select id="m-rteam" name="team" data-action="role-team">${S.teams.map((x) => `<option value="${x.id}" ${x === t ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></label>
+      <label class="f">AI role name<input id="m-rname" name="name" type="text" value="AI role ${t.roles.length + 1}"></label>
+      <div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px">How it takes part${modeChoices()}</div>
+      <label class="f">Accountable person<select id="m-rowner" name="owner">${peopleOptions(t, t.lead)}</select></label>`,
+    onSubmit: (d) => {
+      const tt = team(d.team);
+      tt.roles.push({ id: id(), name: d.name.trim() || "AI role", mode: d.mode, owner: d.owner });
+      S.selected = tt.id; S.tab = "roles"; toast("AI role turned on");
+    },
+  });
+}
+
+function editRole(rid) {
+  const t = team(S.selected), r = t.roles.find((x) => x.id === rid);
+  modal({
+    title: r.name, submit: "Save",
+    fields: `<div class="f" style="display:flex;flex-direction:column;gap:8px;font-weight:600;font-size:14px">How it takes part${modeChoices(r.mode)}</div>
+      <label class="f">Accountable person<select id="m-eowner" name="owner">${peopleOptions(t, r.owner)}</select></label>`,
+    extra: `<button type="button" class="btn danger left" data-action="remove-role" data-id="${rid}">Turn off</button>`,
+    onSubmit: (d) => { r.mode = d.mode; r.owner = d.owner; toast("Saved"); },
+  });
+}
+
+function editMission(mid) {
+  const t = team(S.selected), m = mid ? t.missions.find((x) => x.id === mid) : null;
+  modal({
+    title: m ? "Mission" : "Add mission", submit: m ? "Save" : "Add mission",
+    fields: `<label class="f">Mission title<input id="m-mtitle" name="title" type="text" value="${esc(m ? m.title : "Mission title")}"></label>
+      <label class="f">Owner<select id="m-mowner" name="owner">${peopleOptions(t, m ? m.owner : t.lead)}</select></label>
+      <label class="f">Status<select id="m-mstatus" name="status">${Object.entries(STATUS).map(([k, l]) => `<option value="${k}" ${(m ? m.status : "good") === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>`,
+    onSubmit: (d) => {
+      const vals = { title: d.title.trim() || "Mission title", owner: d.owner, status: d.status };
+      if (m) Object.assign(m, vals); else t.missions.push({ id: id(), progress: 0, ...vals });
+      toast(m ? "Saved" : "Mission added");
+    },
+  });
+}
 
 /* ---------- Events ---------- */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-action]");
-  if (!e.target.closest(".search")) $("#results").hidden = true;
+  const el = e.target.closest("[data-action]");
   if (!e.target.closest("#sidebar") && !e.target.closest(".menu-btn")) $("#sidebar").classList.remove("open");
-  if (!t) return;
-  const { action: a, id } = t.dataset;
+  if (!el) return;
+  const { action: a, id: tid } = el.dataset;
   switch (a) {
-    case "nav": S.nav = t.dataset.k; $("#sidebar").classList.remove("open"); if (S.nav === "teams") go(""); else render(); break;
     case "menu": $("#sidebar").classList.toggle("open"); break;
-    case "open": S.justCreated = null; go("team-" + id); break;
-    case "back": go(""); break;
-    case "create": createTeam(); break;
-    case "add-member": addMember(id); break;
-    case "make-lead": { const tm = team(t.dataset.team); tm.lead = id; render(); toast(`${leadOf(tm).name} now leads ${tm.name}`); break; }
-    case "hit": pickHit(+t.dataset.i); break;
+    case "home": $("#sidebar").classList.remove("open"); break;
+    case "open": S.selected = tid; S.tab = "people"; render(); break;
+    case "close": S.selected = null; render(); break;
+    case "tab": S.tab = el.dataset.k; renderPanel(); break;
+    case "create-team": createTeam(); break;
+    case "add-person": addPerson(); break;
+    case "edit-person": editPerson(tid); break;
+    case "set-role": setRole(el.dataset.team); break;
+    case "edit-role": editRole(tid); break;
+    case "add-mission": editMission(); break;
+    case "edit-mission": editMission(tid); break;
+    case "remove-person": {
+      const t = team(S.selected), p = person(t, tid);
+      t.people.filter((q) => q.manager === tid).forEach((q) => (q.manager = p.manager));
+      t.roles.forEach((r) => r.owner === tid && (r.owner = t.lead));
+      t.missions.forEach((m) => m.owner === tid && (m.owner = t.lead));
+      t.people = t.people.filter((q) => q.id !== tid);
+      closeModal(); render(); toast("Person removed"); break;
+    }
+    case "remove-role": { const t = team(S.selected); t.roles = t.roles.filter((r) => r.id !== tid); closeModal(); render(); toast("AI role turned off"); break; }
     case "close-modal": closeModal(); break;
-    case "scrim": if (e.target === t) closeModal(); break;
-    case "todo": toast(`${t.dataset.what} isn't part of this prototype`); break;
+    case "scrim": if (e.target === el) closeModal(); break;
+    case "todo": toast(`${el.dataset.what} isn't part of this prototype`); break;
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (el.dataset.action === "set-access") { const t = team(S.selected); person(t, el.dataset.id).access = el.value; render(); toast("Access updated"); }
+  if (el.dataset.action === "role-team") {
+    const t = team(el.value);
+    $("#m-rowner").innerHTML = peopleOptions(t, t.lead);
+    $("#m-rname").value = "AI role " + (t.roles.length + 1);
   }
 });
 
 document.addEventListener("keydown", (e) => {
   const row = e.target.closest?.("tr.click");
   if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); row.click(); }
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("#q").focus(); }
   if (e.key === "Escape") {
     if ($("#modal-root").innerHTML) closeModal();
-    else if (!$("#results").hidden) { $("#results").hidden = true; $("#q").blur(); }
-    else if (route()) go("");
+    else if (S.selected) { S.selected = null; render(); }
   }
-});
-
-$("#q").addEventListener("input", search);
-$("#q").addEventListener("focus", search);
-$("#q").addEventListener("keydown", (e) => {
-  const btns = [...document.querySelectorAll("#results button")];
-  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-    e.preventDefault(); if (!btns.length) return;
-    hl = (hl + (e.key === "ArrowDown" ? 1 : -1) + btns.length) % btns.length;
-    btns.forEach((b, i) => b.classList.toggle("hl", i === hl));
-  } else if (e.key === "Enter") { e.preventDefault(); pickHit(hl); }
 });
 
 render();

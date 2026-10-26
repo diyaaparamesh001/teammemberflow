@@ -1,19 +1,22 @@
 # Flownt
 
-A clickable prototype of Flownt's **My Teams** page.
+A clickable prototype of Flownt's **My Teams** page for an organization
+owner, using placeholder text throughout ("Team A", "Person name", "Title").
 
 It's a single static page (`index.html`, no build step) and is responsive:
-a sidebar app on desktop, a collapsible sidebar and stacked rows on phones.
+a sidebar, team list and side sheet on desktop; the side sheet slides over
+on tablets; the sidebar collapses and rows stack on phones.
 
 ## What you can do
 
-- See every team with its lead and member count
-- Click a team to open its details: lead, members, roles and emails
-- **+ Create Team** adds a new team to the list
-- **+ Add member** and **Make lead** on a team's page
-- Search teams and people with ⌘K / Ctrl+K
+- Click a team row to open its side sheet with four tabs:
+  - **People**: who's on the team and who they report to. Add, edit or remove people.
+  - **AI roles**: which AI roles the team uses, how each takes part
+    (suggests, acts with approval, acts on its own) and who is accountable.
+  - **Missions**: the team's work, with owner, progress and status.
+  - **Access**: Admin, Manager and Member levels, and each person's level.
+- **+ Create Team** and **Set up AI role** from the top of the page.
 
-Each team has its own link (for example `#team-engineering`).
 Changes live in the page only and reset on reload.
 
 ## Run locally
