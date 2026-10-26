@@ -8,11 +8,11 @@ down to phone.
 
 | File | Page |
 | --- | --- |
-| `index.html` | **Chat** (home): a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
+| `index.html` | **Home**: a chat history column (projects and recent chats) beside the message box and suggested prompts. Sending a message opens a conversation with a placeholder reply. |
 | `team.html` | **My Team**: teams list with a side sheet for People, AI roles, Missions and Access. |
 | `shell.css`, `shell.js` | Shared colours, main nav sidebar and top bar (search, Needs You, account). |
 
-Home, AI Workforce, Missions and Outcomes aren't built yet.
+AI Workforce, Missions and Outcomes aren't built yet.
 New chats are kept while the tab is open; everything else resets on reload.
 
 ## Run locally

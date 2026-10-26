@@ -1,5 +1,5 @@
 /* Flownt prototype — renders the main nav and utility bar shared by every page.
-   A page calls Shell.mount("chat" | "team") once. */
+   A page calls Shell.mount("home" | "team") once. */
 (function () {
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -15,8 +15,7 @@
   function mount(page) {
     $("#sidebar").innerHTML = `
       <a class="brand" href="index.html"><i></i>Flownt</a>
-      ${todo("Home")}
-      ${navLink("index.html", "Chat", page === "chat")}
+      ${navLink("index.html", "Home", page === "home")}
       ${navLink("team.html", "My Team", page === "team")}
       ${todo("AI Workforce")}
       ${todo("Missions")}

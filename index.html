@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flownt Chat</title>
+<title>Flownt Home</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1f'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* Chat: chat history column | chat area (heading, message box, suggestion cards). A conversation docks the box at the bottom.
+/* Home: chat history column | chat area (heading, message box, suggestion cards). A conversation docks the box at the bottom.
    Shared shell lives in shell.css. */
 .content.chat-page { padding: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); overflow: hidden; }
 
@@ -147,8 +147,8 @@ function render() {
       <div class="list"><h2>Chats in this project</h2>
         ${[1, 2, 3].map((n) => `<a href="#" data-open-title="Chat title ${n}"><span>Chat title ${n}</span><span class="muted">Date</span></a>`).join("")}</div></div>`;
   } else {
-    document.title = "Flownt Chat";
-    area.innerHTML = `<div class="chat">${histBtn}<h1>Chat</h1>
+    document.title = "Flownt Home";
+    area.innerHTML = `<div class="chat">${histBtn}<h1>Home</h1>
       ${composer("Message Flownt...")}
       <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
   }
@@ -224,7 +224,7 @@ document.addEventListener("click", (e) => {
 });
 
 window.addEventListener("hashchange", render);
-Shell.mount("chat");
+Shell.mount("home");
 render();
 </script>
 </body>
