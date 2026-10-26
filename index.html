@@ -99,7 +99,8 @@ h1, h2, h3, p { margin: 0; }
 .stat small { color: var(--muted); font-size: 13px; }
 
 /* Team table */
-.tw { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow-x: auto; }
+.tw { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow-x: auto; max-width: 560px; }
+.who-tx small { display: block; color: var(--muted); font-size: 13px; }
 .tname, td.meta, td .who { white-space: nowrap; }
 table { border-collapse: collapse; width: 100%; }
 th, td { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; font-size: 14px; }
@@ -320,13 +321,12 @@ function render() {
       <div class="stat"><span>Active missions</span><b>${S.teams.reduce((n, t) => n + t.missions.length, 0)}</b><small>Across all teams</small></div>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Team</th><th>Team lead</th><th>Members</th><th class="chev"></th></tr></thead>
+      <thead><tr><th>Team</th><th>Team lead</th><th class="chev"></th></tr></thead>
       <tbody>${S.teams.map((t) => {
         const l = leadOf(t);
         return `<tr class="click ${S.selected === t.id ? "sel" : ""}" tabindex="0" data-action="open" data-id="${t.id}" aria-label="Open ${esc(t.name)}">
           <td class="tname">${esc(t.name)}</td>
-          <td><span class="who"><span class="av">${esc(initials(l.name))}</span>${esc(l.name)}</span></td>
-          <td class="meta">${plural(t.people.length, "member")}</td>
+          <td><span class="who"><span class="av">${esc(initials(l.name))}</span><span class="who-tx">${esc(l.name)}<small>${plural(t.people.length, "member")}</small></span></span></td>
           <td class="chev" aria-hidden="true">›</td>
         </tr>`;
       }).join("")}</tbody>
