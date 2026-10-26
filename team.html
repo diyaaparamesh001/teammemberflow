@@ -24,20 +24,6 @@
 .stat b { display: block; margin-top: 6px; font-size: 30px; font-weight: 800; line-height: 1.25; font-variant-numeric: tabular-nums; }
 .stat small { margin-top: auto; line-height: 1.3; color: var(--muted); font-size: 13px; }
 
-/* List and detail */
-.split { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; }
-.teams { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; }
-.search { border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 12px; background: var(--bg); width: 100%; }
-.search:focus { border-color: var(--accent); outline: none; }
-.team-list { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow: hidden; }
-.team-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 11px 14px; border-bottom: 1px solid var(--line-soft); }
-.team-btn:last-child { border-bottom: 0; }
-.team-btn:hover { background: var(--sunk); }
-.team-btn b { display: block; font-weight: 800; }
-.team-btn small { color: var(--muted); font-size: 13px; }
-.team-btn.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
-.team-btn .chev { color: var(--muted); }
-.no-match { font-size: 14px; padding: 12px 14px; color: var(--muted); }
 
 .detail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .t-head { display: flex; align-items: center; gap: 12px; }
@@ -120,8 +106,6 @@ tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   .content { padding-top: 10px; }
   .stat { padding: 12px; }
   .stat span { min-height: 2.6em; }
-  .split { grid-template-columns: minmax(0, 1fr); }
-  .teams { position: static; }
 
   /* People table becomes stacked rows */
   thead { display: none; }
@@ -189,7 +173,6 @@ const S = {
   selected: "team-a",
   person: null,
   showAll: false,
-  query: "",
 };
 
 const $ = (s) => document.querySelector(s);
@@ -214,25 +197,9 @@ function render() {
       <div class="stat"><span>My Active Missions</span><b>4</b><small>Missions you're involved in</small></div>
       <div class="stat"><span>AI Roles I Look After</span><b>2</b><small>Roles you're responsible for</small></div>
     </div>
-    <div class="split">
-      <div class="teams">
-        <input class="search" id="team-search" type="search" placeholder="Search teams..." aria-label="Search teams" autocomplete="off" value="${esc(S.query)}">
-        <div class="team-list" id="team-list"></div>
-      </div>
-      <div class="detail" id="detail"></div>
-    </div>`;
-  renderList();
+    <div class="detail" id="detail"></div>`;
   renderDetail();
   renderPanel();
-}
-
-function renderList() {
-  const q = S.query.trim().toLowerCase();
-  const shown = S.teams.filter((t) => t.name.toLowerCase().includes(q));
-  $("#team-list").innerHTML = shown.length ? shown.map((t) => `
-    <button class="team-btn ${S.selected === t.id ? "on" : ""}" data-action="open" data-id="${t.id}" aria-pressed="${S.selected === t.id}">
-      <span><b>${esc(t.name)}</b><small>${plural(t.people.length, "member")}</small></span><span class="chev" aria-hidden="true">›</span>
-    </button>`).join("") : `<p class="no-match">No teams match that search.</p>`;
 }
 
 function renderDetail() {
@@ -337,7 +304,6 @@ document.addEventListener("click", (e) => {
   if (!el) return;
   const { action: a, id: tid } = el.dataset;
   switch (a) {
-    case "open": S.selected = tid; S.person = null; S.showAll = false; renderList(); renderDetail(); renderPanel(); break;
     case "person": S.person = tid; renderDetail(); renderPanel(); break;
     case "close": S.person = null; renderDetail(); renderPanel(); break;
     case "toggle-all": S.showAll = !S.showAll; renderDetail(); break;
@@ -358,10 +324,6 @@ document.addEventListener("click", (e) => {
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === el) closeModal(); break;
   }
-});
-
-document.addEventListener("input", (e) => {
-  if (e.target.id === "team-search") { S.query = e.target.value; renderList(); }
 });
 
 document.addEventListener("keydown", (e) => {
