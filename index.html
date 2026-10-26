@@ -9,9 +9,25 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* Chat: heading, message box, suggestion cards; a conversation docks the box at the bottom. Shared shell lives in shell.css. */
-.content { display: flex; flex-direction: column; padding-top: 44px; }
-.chat { width: 100%; max-width: 900px; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* Chat: chat history column | chat area (heading, message box, suggestion cards). A conversation docks the box at the bottom.
+   Shared shell lives in shell.css. */
+.content.chat-page { padding: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); overflow: hidden; }
+
+/* Chat history */
+.history { border-right: 1px solid var(--line-soft); padding: 18px 12px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; background: var(--bg); }
+.history .new { margin-bottom: 8px; justify-content: flex-start; }
+.h-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 5px; }
+.history a { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 14px; color: inherit; text-decoration: none; min-width: 0; }
+.history a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history a i { width: 13px; height: 13px; border: 1.5px solid var(--muted); border-radius: 3px; flex: none; }
+.history a:hover { background: var(--chip); }
+.history a.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.history a.on i { border-color: var(--accent); }
+.hist-btn { display: none; }
+
+/* Chat area */
+.chat-area { overflow-y: auto; padding: 44px 40px 0; display: flex; flex-direction: column; }
+.chat { width: 100%; max-width: 860px; display: flex; flex-direction: column; flex: 1; padding-bottom: 40px; }
 .chat h1 { font-size: 32px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 20px; }
 .chat .lede { margin: -12px 0 20px; }
 
@@ -29,13 +45,14 @@
 .card span { color: var(--muted); font-size: 14px; }
 
 /* Conversation */
+.chat.convo { padding-bottom: 0; }
 .thread { display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; flex: 1; }
 .msg { max-width: min(78%, 620px); padding: 12px 15px; border-radius: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word; }
 .msg.mine { align-self: flex-end; background: var(--accent-soft); border-bottom-right-radius: 4px; }
 .msg.ai { align-self: flex-start; border: 1.5px solid var(--line-soft); border-bottom-left-radius: 4px; }
 .msg.ai small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
 .msg.typing { color: var(--muted); }
-.docked { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 4px; }
+.docked { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 20px; }
 .docked .composer { min-height: 0; flex-direction: row; align-items: flex-end; padding: 10px 10px 10px 18px; }
 .docked .composer textarea { min-height: 28px; max-height: 160px; padding: 9px 0; font-size: 16px; }
 
@@ -45,13 +62,20 @@
 .list a:last-child { border-bottom: 0; }
 .list a:hover { background: var(--sunk); }
 
+@media (max-width: 1100px) {
+  .cards { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .card { min-height: 0; }
+}
 @media (max-width: 860px) {
-  .content { padding-top: 26px; }
+  .content.chat-page { grid-template-columns: minmax(0, 1fr); }
+  .history { position: fixed; top: 0; bottom: 0; left: 0; width: 272px; z-index: 54; transform: translateX(-100%); transition: transform .2s; box-shadow: none;
+    padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
+  .history.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.2); }
+  .hist-btn { display: inline-flex; align-self: flex-start; margin-bottom: 14px; }
+  .chat-area { padding: 18px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
   .chat h1 { font-size: 26px; }
   .composer { min-height: 190px; }
   .composer textarea { min-height: 100px; }
-  .cards { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .card { min-height: 0; }
 }
 </style>
 </head>
@@ -60,7 +84,10 @@
   <aside class="sidebar" id="sidebar"></aside>
   <div class="main">
     <header class="topbar" id="topbar"></header>
-    <main class="content" id="content"></main>
+    <main class="content chat-page">
+      <nav class="history" id="history" aria-label="Chat history"></nav>
+      <div class="chat-area" id="chat-area"></div>
+    </main>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -71,6 +98,29 @@ const $ = (s) => document.querySelector(s);
 const esc = Shell.esc;
 const SUGGESTIONS = [1, 2, 3].map((n) => ({ title: `Suggested prompt ${n}`, text: "Prompt description goes here." }));
 const REPLY = "Placeholder reply from Flownt. This is where the answer to your message would appear.";
+const PROJECTS = [1, 2, 3].map((n) => ({ id: `project-${n}`, title: `Project name ${n}` }));
+const STARTER = [1, 2, 3].map((n) => ({ id: `chat-${n}`, title: `Chat title ${n}`, messages: [
+  { from: "me", text: "Message text goes here." }, { from: "ai", text: REPLY }] }));
+
+// New chats survive a trip to another page in the same tab; the page works without storage too.
+const KEY = "flownt-chats-v2";
+let chats;
+try { chats = JSON.parse(sessionStorage.getItem(KEY)); } catch { chats = null; }
+if (!Array.isArray(chats)) chats = STARTER;
+const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(chats)); } catch {} };
+const findChat = (k) => chats.find((c) => c.id === k);
+const findProject = (k) => PROJECTS.find((p) => p.id === k);
+const key = () => location.hash.slice(1);
+
+function renderHistory() {
+  const link = (item, box) => `<a href="#${item.id}" class="${key() === item.id ? "on" : ""}">${box ? "<i></i>" : ""}<span>${esc(item.title)}</span></a>`;
+  $("#history").innerHTML = `
+    <a href="#" class="btn new" data-new>+ New chat</a>
+    <div class="h-label">Projects</div>
+    ${PROJECTS.map((p) => link(p, true)).join("")}
+    <div class="h-label">Recent</div>
+    ${chats.slice(0, 8).map((c) => link(c, false)).join("")}`;
+}
 
 function composer(placeholder, docked) {
   return `<div class="${docked ? "docked" : ""}"><form class="composer" id="composer">
@@ -78,31 +128,31 @@ function composer(placeholder, docked) {
     <button class="send" id="send" type="submit" aria-label="Send" disabled>↑</button>
   </form></div>`;
 }
+const histBtn = `<button class="btn hist-btn" data-hist>☰ Chat history</button>`;
 
 /* Views: new chat (no hash), a project (#project-…), or a conversation (#chat-…) */
 function render() {
-  const key = location.hash.slice(1);
-  const chat = Shell.chat(key), project = Shell.project(key);
-  const c = $("#content");
+  const chat = findChat(key()), project = findProject(key());
+  const area = $("#chat-area");
   if (chat) {
     document.title = `${chat.title} · Flownt`;
-    c.innerHTML = `<div class="chat"><h1>${esc(chat.title)}</h1>
-      <div class="thread" id="thread">${chat.messages.map(bubble).join("")}</div>
+    area.innerHTML = `<div class="chat convo">${histBtn}<h1>${esc(chat.title)}</h1>
+      <div class="thread">${chat.messages.map(bubble).join("")}</div>
       ${composer("Reply to Flownt...", true)}</div>`;
-    c.scrollTop = c.scrollHeight;
+    area.scrollTop = area.scrollHeight;
   } else if (project) {
     document.title = `${project.title} · Flownt`;
-    c.innerHTML = `<div class="chat"><h1>${esc(project.title)}</h1><p class="lede">Project description goes here.</p>
+    area.innerHTML = `<div class="chat">${histBtn}<h1>${esc(project.title)}</h1><p class="lede">Project description goes here.</p>
       ${composer(`Message Flownt about ${project.title}...`)}
       <div class="list"><h2>Chats in this project</h2>
-        ${[1, 2, 3].map((n) => `<a href="#" data-chat-title="Chat title ${n}"><span>Chat title ${n}</span><span class="muted">Date</span></a>`).join("")}</div></div>`;
+        ${[1, 2, 3].map((n) => `<a href="#" data-open-title="Chat title ${n}"><span>Chat title ${n}</span><span class="muted">Date</span></a>`).join("")}</div></div>`;
   } else {
     document.title = "Flownt Chat";
-    c.innerHTML = `<div class="chat"><h1>Chat</h1>
+    area.innerHTML = `<div class="chat">${histBtn}<h1>Chat</h1>
       ${composer("Message Flownt...")}
       <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
   }
-  Shell.refresh();
+  renderHistory();
   wire(chat, project);
 }
 
@@ -112,41 +162,53 @@ const bubble = (m) => m.from === "me"
 
 function wire(chat, project) {
   const form = $("#composer"), box = $("#msg"), send = $("#send");
-  const grow = () => { if (chat) { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; } };
-  box.addEventListener("input", () => { send.disabled = !box.value.trim(); grow(); });
+  box.addEventListener("input", () => {
+    send.disabled = !box.value.trim();
+    if (chat) { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; }
+  });
   box.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = box.value.trim();
     if (!text) return;
-    if (chat) reply(chat, text);
-    else startChat(text, project);
+    if (chat) reply(chat, text); else startChat(text);
   });
   if (!matchMedia("(max-width: 860px)").matches) box.focus();
 }
 
-function startChat(text, project) {
-  const title = text.length > 34 ? text.slice(0, 32).trimEnd() + "…" : text;
-  const chat = { id: "chat-" + Date.now().toString(36), title, project: project?.id || null, messages: [] };
-  Shell.addChat(chat);
-  location.hash = chat.id;           // renders the conversation
-  setTimeout(() => reply(chat, text), 0);
+function addChat(title, messages = []) {
+  const chat = { id: "chat-" + Date.now().toString(36), title, messages };
+  chats = [chat, ...chats]; save();
+  return chat;
+}
+
+function startChat(text) {
+  const chat = addChat(text.length > 34 ? text.slice(0, 32).trimEnd() + "…" : text);
+  location.hash = chat.id;
+  reply(chat, text);
 }
 
 function reply(chat, text) {
-  chat.messages.push({ from: "me", text });
-  chat.messages.push({ from: "ai", text: "Flownt is typing…", typing: true });
-  Shell.saveChats();
-  render();
+  chat.messages.push({ from: "me", text }, { from: "ai", text: "Flownt is typing…", typing: true });
+  save(); render();
   setTimeout(() => {
     const last = chat.messages[chat.messages.length - 1];
-    last.text = REPLY; delete last.typing;
-    Shell.saveChats();
-    if (location.hash.slice(1) === chat.id) render();
+    last.text = REPLY; delete last.typing; save();
+    if (key() === chat.id) render();
   }, 700);
 }
 
 document.addEventListener("click", (e) => {
+  const hist = $("#history");
+  if (e.target.closest("[data-hist]")) { hist.classList.toggle("open"); return; }
+  if (!e.target.closest("#history")) hist.classList.remove("open");
+  if (e.target.closest("#history a")) hist.classList.remove("open");
+
+  if (e.target.closest("[data-new]")) {
+    e.preventDefault();
+    history.replaceState(null, "", location.pathname);
+    render();
+  }
   const s = e.target.closest("[data-suggest]");
   if (s) {
     const box = $("#msg"), item = SUGGESTIONS[+s.dataset.suggest];
@@ -154,13 +216,10 @@ document.addEventListener("click", (e) => {
     $("#send").disabled = false;
     box.focus();
   }
-  const pc = e.target.closest("[data-chat-title]");
+  const pc = e.target.closest("[data-open-title]");
   if (pc) {
     e.preventDefault();
-    const chat = { id: "chat-" + Date.now().toString(36), title: pc.dataset.chatTitle, messages: [
-      { from: "me", text: "Message text goes here." }, { from: "ai", text: REPLY }] };
-    Shell.addChat(chat);
-    location.hash = chat.id;
+    location.hash = addChat(pc.dataset.openTitle, [{ from: "me", text: "Message text goes here." }, { from: "ai", text: REPLY }]).id;
   }
 });
 
