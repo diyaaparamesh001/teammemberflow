@@ -36,9 +36,9 @@
 .chat.start { justify-content: flex-end; }
 .chat .lede { margin: 0 0 16px; }
 
-.composer { border: 1.5px solid var(--line); border-radius: 14px; background: var(--bg); padding: 14px 14px 12px 20px; display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+.composer { border: 1.5px solid var(--line); border-radius: 14px; background: var(--bg); padding: 14px 14px 12px 20px; display: flex; flex-direction: column; gap: 6px; min-height: 104px; }
 .composer:focus-within { border-color: var(--accent); }
-.composer textarea { flex: 1; border: 0; outline: none; resize: none; background: transparent; font-size: 17px; line-height: 1.5; min-height: 72px; padding: 4px 0 0; }
+.composer textarea { flex: 1; border: 0; outline: none; resize: none; background: transparent; font-size: 17px; line-height: 1.5; min-height: 48px; padding: 4px 0 0; }
 .composer textarea::placeholder { color: var(--muted); }
 .send { align-self: flex-end; width: 42px; height: 42px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 19px; font-weight: 800; flex: none; }
 .send:disabled { opacity: .35; cursor: default; }
@@ -76,7 +76,7 @@
   .hist-btn { display: inline-flex; padding: 6px 10px; flex: none; }
   .chat-head { padding: 12px 14px; }
   .chat-body { padding: 16px 14px 0; }
-  .composer { min-height: 140px; }
+  .composer { min-height: 104px; }
   .cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 }
 </style>
@@ -136,7 +136,7 @@ function renderHistory() {
 
 function composer(placeholder, docked) {
   return `<div class="${docked ? "docked" : ""}"><form class="composer" id="composer">
-    <textarea id="msg" rows="${docked ? 1 : 3}" placeholder="${esc(placeholder)}" aria-label="Message"></textarea>
+    <textarea id="msg" rows="${docked ? 1 : 2}" placeholder="${esc(placeholder)}" aria-label="Message"></textarea>
     <button class="send" id="send" type="submit" aria-label="Send" disabled>↑</button>
   </form></div>`;
 }
