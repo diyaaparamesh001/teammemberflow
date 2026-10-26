@@ -46,11 +46,12 @@
 .sub:last-child { border-bottom: 0; }
 .sub-title { display: flex; align-items: center; gap: 8px; font-weight: 700; }
 .sub-title::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent); flex: none; }
-.workers { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 16px; }
-.worker { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--line-soft); border-radius: 99px; padding: 3px 10px 3px 3px; font-size: 13px; }
-.worker:hover { border-color: var(--accent); }
-.worker .av { width: 24px; height: 24px; font-size: 9px; }
-.workers small { color: var(--muted); font-size: 12px; align-self: center; margin-right: 2px; }
+.workers { display: flex; flex-direction: column; gap: 2px; margin-left: 3px; padding-left: 16px; border-left: 2px solid var(--line-soft); }
+.worker { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; width: 100%; text-align: left; }
+.worker:hover { background: var(--sunk); }
+.worker .av { width: 28px; height: 28px; font-size: 10px; }
+.worker b { display: block; font-size: 14px; font-weight: 700; }
+.worker small { display: block; color: var(--muted); font-size: 12px; }
 .mission .flag { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.2); display: grid; place-items: center; flex: none; }
 .mission small { display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em; opacity: .85; }
 .mission b { font-size: 17px; font-weight: 800; }
@@ -216,7 +217,7 @@ function renderDetail() {
       return `<button class="mission" data-action="mission" data-id="${m.id}" aria-expanded="${open}">
           <span class="flag" aria-hidden="true">⚑</span><div><small>MISSION</small><b>${esc(m.title)}</b></div><span class="arrow" aria-hidden="true">▼</span></button>
         ${open ? `<div class="subs">${m.subs.map((sub) => `<div class="sub"><span class="sub-title">${esc(sub.title)}</span>
-          <div class="workers"><small>Working on it:</small>${sub.people.map((pid) => { const q = person(t, pid); return q ? `<button class="worker" data-action="person" data-id="${q.id}"><span class="av">${esc(initials(q.name))}</span>${esc(q.name)}</button>` : ""; }).join("")}</div></div>`).join("")}</div>` : ""}`;
+          <div class="workers">${sub.people.map((pid) => { const q = person(t, pid); return q ? `<button class="worker" data-action="person" data-id="${q.id}"><span class="av">${esc(initials(q.name))}</span><span><b>${esc(q.name)}</b><small>${esc(q.title)}</small></span></button>` : ""; }).join("")}</div></div>`).join("")}</div>` : ""}`;
     }).join("")}</div>
     <div class="sec-row"><h3>People</h3></div>
     <div class="tw"><table>
