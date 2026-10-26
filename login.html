@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flownt Log in</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="shell.css">
+<style>
+/* Log in: one centered card. Shared tokens live in shell.css. */
+body { display: grid; place-items: center; grid-template-columns: minmax(0, 400px); justify-content: center; min-height: 100%; background: var(--side);
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.card { width: 100%; background: var(--bg); border: 1.5px solid var(--line-soft); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 18px; }
+.brand { padding: 0; }
+.card h1 { font-size: 26px; font-weight: 800; }
+.card label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+.card input { border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 12px; background: var(--bg); font-weight: 400; }
+.card input:focus { border-color: var(--accent); outline: none; }
+.card .btn.primary { width: 100%; padding: 12px; margin-top: 4px; }
+.err { color: var(--bad); font-size: 13px; font-weight: 600; }
+@media (max-width: 480px) { .card { padding: 24px 20px; } }
+</style>
+</head>
+<body>
+<form class="card" id="login" novalidate>
+  <div class="brand"><i></i>Flownt</div>
+  <h1>Log in</h1>
+  <label>Email<input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com"></label>
+  <label>Password<input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password"></label>
+  <span class="err" id="err" hidden></span>
+  <button class="btn primary" type="submit">Log in</button>
+</form>
+
+<script>
+const form = document.getElementById("login"), err = document.getElementById("err");
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = form.email.value.trim(), password = form.password.value;
+  const show = (m) => { err.textContent = m; err.hidden = false; };
+  if (!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.");
+  if (!password) return show("Enter your password.");
+  location.href = "index.html";
+});
+</script>
+</body>
+</html>
