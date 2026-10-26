@@ -90,6 +90,12 @@ h1, h2, h3, p { margin: 0; }
 .btn.danger { color: var(--bad); }
 .btn.sm { padding: 6px 11px; font-size: 13px; }
 
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+.stat { border: 1.5px solid var(--line-soft); border-radius: var(--r); padding: 14px 16px; }
+.stat span { display: block; font-size: 13px; font-weight: 600; color: var(--muted); }
+.stat b { display: block; font-size: 28px; font-weight: 800; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.stat small { color: var(--muted); font-size: 13px; }
+
 /* Team table */
 .tw { border: 1.5px solid var(--line-soft); border-radius: var(--r); overflow-x: auto; }
 .tname, td.meta, td .who { white-space: nowrap; }
@@ -182,6 +188,7 @@ select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5p
   .ph h1 { font-size: 25px; }
   .acts { width: 100%; }
   .acts .btn { flex: 1; }
+  .stats { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 
   /* Team table becomes stacked rows */
   thead { display: none; }
@@ -294,8 +301,13 @@ function render() {
 
   $("#content").innerHTML = `
     <div class="ph">
-      <div><h1>My Teams</h1><p class="lede">Page description goes here.</p></div>
+      <div><h1>Team Name</h1><p class="lede">Page description goes here.</p></div>
       <div class="acts"><button class="btn" data-action="set-role">Set up AI role</button><button class="btn primary" data-action="create-team">+ Create Team</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Teams</span><b>${S.teams.length}</b><small>In your organization</small></div>
+      <div class="stat"><span>AI roles</span><b>${S.teams.reduce((n, t) => n + t.roles.length, 0)}</b><small>Across all teams</small></div>
+      <div class="stat"><span>Active missions</span><b>${S.teams.reduce((n, t) => n + t.missions.length, 0)}</b><small>Across all teams</small></div>
     </div>
     <div class="tw"><table>
       <thead><tr><th>Team</th><th>Team lead</th><th>Members</th><th>AI roles</th><th>Missions</th><th class="chev"></th></tr></thead>
