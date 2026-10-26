@@ -210,6 +210,8 @@ function roleForm(r) {
     const d = new FormData(f), teams = d.getAll("teams");
     const err = (m) => { const el = $("#merr"); el.textContent = m; el.hidden = false; };
     if (!d.get("name").trim()) return err("Enter a role name.");
+    if (!lines(d.get("tools")).length) return err("Add at least one tool or integration.");
+    if (!lines(d.get("links")).length) return err("Add at least one link or resource.");
     if (!teams.length) return err("Choose at least one team.");
     const vals = { name: d.get("name").trim(), purpose: d.get("purpose").trim(), instructions: d.get("instructions").trim(),
       tools: lines(d.get("tools")), links: lines(d.get("links")), owner: d.get("owner"), teams };
