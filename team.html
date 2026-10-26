@@ -82,6 +82,9 @@ button.item:hover { background: var(--sunk); }
 .level b { display: block; margin-bottom: 2px; }
 .level small { color: var(--muted); font-size: 13px; }
 .sec-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 10px 0 2px; }
+.p-search { border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 12px; background: var(--bg); width: 100%; margin: 4px 0 6px; }
+.p-search:focus { border-color: var(--accent); outline: none; }
+.no-match { font-size: 14px; padding: 6px 0; }
 select.inline { border: 1.5px solid var(--line); border-radius: 7px; padding: 5px 8px; background: var(--bg); font-size: 13px; }
 
 /* Modal + toast */
@@ -272,7 +275,9 @@ function accessTab(t) {
   return `<div class="sum">${Object.keys(ACCESS).map((l) => `<div><span>${l}s</span><b>${count(l)}</b></div>`).join("")}</div>
     ${Object.entries(ACCESS).map(([l, d]) => `<div class="level"><b>${l}</b><small>${d}</small></div>`).join("")}
     <div class="sec-label">People</div>
-    ${t.people.map((p) => `<div class="item"><span class="av">${esc(initials(p.name))}</span><span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}</small></span>
+    <input class="p-search" id="access-search" type="search" placeholder="Search people..." aria-label="Search people" autocomplete="off">
+    <p class="muted no-match" id="access-none" hidden>No one matches that search.</p>
+    ${t.people.map((p) => `<div class="item" data-search="${esc((label(t, p) + " " + p.access).toLowerCase())}"><span class="av">${esc(initials(p.name))}</span><span class="tx"><b>${esc(p.name)}</b><small>${esc(p.title)}</small></span>
       <select class="inline" data-action="set-access" data-id="${p.id}" aria-label="Access for ${esc(label(t, p))}" ${p.id === t.lead ? "disabled" : ""}>
         ${Object.keys(ACCESS).map((l) => `<option ${p.access === l ? "selected" : ""}>${l}</option>`).join("")}</select></div>`).join("")}`;
 }
@@ -416,6 +421,14 @@ document.addEventListener("click", (e) => {
     case "close-modal": closeModal(); break;
     case "scrim": if (e.target === el) closeModal(); break;
   }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "access-search") return;
+  const q = e.target.value.trim().toLowerCase();
+  let shown = 0;
+  document.querySelectorAll(".p-body [data-search]").forEach((el) => { el.hidden = !!q && !el.dataset.search.includes(q); if (!el.hidden) shown++; });
+  $("#access-none").hidden = shown > 0;
 });
 
 document.addEventListener("change", (e) => {
