@@ -214,7 +214,7 @@ function renderDetail() {
       <div><h2>${esc(t.name)}</h2><small>Led by ${esc(lead.name)} · ${plural(t.people.length, "member")}</small></div></div>
     ${t.about ? `<p class="t-about">${esc(t.about)}</p>` : ""}
     <div class="mission"><span class="flag" aria-hidden="true">⚑</span><div><small>MISSION</small><b>${esc(t.mission)}</b></div></div>
-    <div class="sec-row"><h3>People</h3><button class="btn dashed sm" data-action="add-person">+ Add person</button></div>
+    <div class="sec-row"><h3>People</h3></div>
     <div class="tw"><table>
       <thead><tr><th>Person</th><th>AI roles they look after</th><th>Access</th><th class="chev"></th></tr></thead>
       <tbody>${visible.map((p) => {
@@ -265,22 +265,6 @@ function modal({ title, intro = "", fields, submit, extra = "", onSubmit }) {
   });
 }
 const closeModal = () => ($("#modal-root").innerHTML = "");
-const accessSelect = (sel = "Member") => `<select id="m-access" name="access">${Object.keys(ACCESS).map((l) => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("")}</select>`;
-
-function addPerson() {
-  const t = team(S.selected);
-  modal({
-    title: `Add person to ${t.name}`, submit: "Add person",
-    fields: `<label class="f">Name<input id="m-pname" name="name" type="text" value="Person name"></label>
-      <label class="f">Title<input id="m-ptitle" name="title" type="text" value="Title"></label>
-      <label class="f">Reports to<select id="m-pmgr" name="manager">${peopleOptions(t, t.lead)}</select></label>
-      <label class="f">Access${accessSelect()}</label>`,
-    onSubmit: (d) => {
-      t.people.push({ id: id(), name: d.name.trim() || "Person name", title: d.title.trim() || "Title", manager: d.manager, access: d.access });
-      S.showAll = true; toast("Person added");
-    },
-  });
-}
 
 function editPerson(pid) {
   const t = team(S.selected), p = person(t, pid), isLead = pid === t.lead;
@@ -314,7 +298,6 @@ document.addEventListener("click", (e) => {
       if (p.access !== el.dataset.level) { p.access = el.dataset.level; renderDetail(); renderPanel(); toast(`Access set to ${p.access}`); }
       break;
     }
-    case "add-person": addPerson(); break;
     case "edit-person": editPerson(tid); break;
     case "remove-person": {
       const t = team(S.selected), p = person(t, tid);
