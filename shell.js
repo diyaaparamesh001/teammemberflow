@@ -15,8 +15,8 @@
 
   function mount(page, { title = "", action = "" } = {}) {
     $("#sidebar").innerHTML = `
-      <a class="brand" href="index.html"><i></i>Flownt</a>
-      ${navLink("index.html", "Home", page === "home")}
+      <a class="brand" href="home.html"><i></i>Flownt</a>
+      ${navLink("home.html", "Home", page === "home")}
       ${navLink("team.html", "My Team", page === "team")}
       ${navLink("workforce.html", "AI Workforce", page === "workforce")}
       ${todo("Missions")}

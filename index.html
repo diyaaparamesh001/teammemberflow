@@ -3,242 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Flownt Home</title>
+<title>Flownt Log in</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1f'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="shell.css">
 <style>
-/* Home: one chat box — chat history column | chat panel (header, message box, suggestion cards).
-   A conversation docks the message box at the bottom. Shared shell lives in shell.css. */
-.content.home-page { display: flex; flex-direction: column; overflow: hidden; padding-top: 8px; padding-bottom: 20px; }
-.chat-box { flex: 1; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); border: 1.5px solid var(--line-soft); border-radius: 14px; overflow: hidden; }
-
-/* Chat history */
-.history { border-right: 1px solid var(--line-soft); padding: 16px 12px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; background: var(--sunk); }
-.history .new { margin-bottom: 8px; justify-content: flex-start; }
-.h-label { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 5px; }
-.history a { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 14px; color: inherit; text-decoration: none; min-width: 0; }
-.history a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.history a i { width: 13px; height: 13px; border: 1.5px solid var(--muted); border-radius: 3px; flex: none; }
-.history a:hover { background: var(--chip); }
-.history a.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-.history a.on i { border-color: var(--accent); }
-.hist-btn { display: none; }
-
-/* Chat panel */
-.chat-panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.chat-head { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--line-soft); }
-.chat-head h2 { font-size: 20px; font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chat-body { flex: 1; overflow-y: auto; padding: 18px 24px 0; display: flex; flex-direction: column; }
-.chat { width: 100%; max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; padding-bottom: 18px; }
-.chat.start { justify-content: flex-end; }
-.chat .lede { margin: 0 0 16px; }
-
-.composer { border: 1.5px solid var(--line); border-radius: 14px; background: var(--bg); padding: 14px 14px 12px 20px; display: flex; flex-direction: column; gap: 6px; min-height: 104px; }
-.composer:focus-within { border-color: var(--accent); }
-.composer textarea { flex: 1; border: 0; outline: none; resize: none; background: transparent; font-size: 17px; line-height: 1.5; min-height: 48px; padding: 4px 0 0; }
-.composer textarea::placeholder { color: var(--muted); }
-.send { align-self: flex-end; width: 42px; height: 42px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 19px; font-weight: 800; flex: none; }
-.send:disabled { opacity: .35; cursor: default; }
-
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
-.card { border: 1.5px solid var(--line-soft); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
-.card:hover { border-color: var(--accent); }
-.card.primary { border: 2px solid var(--accent); padding: 13.5px 15.5px; }
-.card.primary b { color: var(--accent); }
-.card b { font-weight: 700; }
-.card span { color: var(--muted); font-size: 14px; }
-
-/* Conversation */
-.chat.convo { padding-bottom: 0; }
-.thread { display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; flex: 1; }
-.msg { max-width: min(78%, 620px); padding: 12px 15px; border-radius: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word; }
-.msg.mine { align-self: flex-end; background: var(--accent-soft); border-bottom-right-radius: 4px; }
-.msg.ai { align-self: flex-start; border: 1.5px solid var(--line-soft); border-bottom-left-radius: 4px; }
-.msg.ai small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
-.msg.typing { color: var(--muted); }
-.docked { position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 18px; }
-.docked .composer { min-height: 0; flex-direction: row; align-items: flex-end; padding: 10px 10px 10px 18px; }
-.docked .composer textarea { min-height: 28px; max-height: 160px; padding: 9px 0; font-size: 16px; }
-
-.list { border: 1.5px solid var(--line-soft); border-radius: var(--r); margin-top: 22px; }
-.list h2 { font-size: 13px; font-weight: 700; color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line-soft); background: var(--sunk); border-radius: var(--r) var(--r) 0 0; }
-.list a { display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--line-soft); color: inherit; text-decoration: none; }
-.list a:last-child { border-bottom: 0; }
-.list a:hover { background: var(--sunk); }
-
-@media (max-width: 860px) {
-  .chat-box { grid-template-columns: minmax(0, 1fr); }
-  .history { position: fixed; top: 0; bottom: 0; left: 0; width: 272px; z-index: 54; transform: translateX(-100%); transition: transform .2s; box-shadow: none;
-    padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-top: calc(18px + env(safe-area-inset-top, 0px)); }
-  .history.open { transform: none; box-shadow: 10px 0 40px rgba(0,0,0,.2); }
-  .hist-btn { display: inline-flex; padding: 6px 10px; flex: none; }
-  .chat-head { padding: 12px 14px; }
-  .chat-body { padding: 16px 14px 0; }
-  .composer { min-height: 104px; }
-  .cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-}
+/* Log in: one centered card. Shared tokens live in shell.css. */
+body { display: grid; place-items: center; grid-template-columns: minmax(0, 400px); justify-content: center; min-height: 100%; background: var(--side);
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.card { width: 100%; background: var(--bg); border: 1.5px solid var(--line-soft); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 18px; }
+.brand { padding: 0; }
+.card h1 { font-size: 26px; font-weight: 800; }
+.card label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+.card input { border: 1.5px solid var(--line); border-radius: 8px; padding: 11px 12px; background: var(--bg); font-weight: 400; }
+.card input:focus { border-color: var(--accent); outline: none; }
+.card .btn.primary { width: 100%; padding: 12px; margin-top: 4px; }
+.err { color: var(--bad); font-size: 13px; font-weight: 600; }
+@media (max-width: 480px) { .card { padding: 24px 20px; } }
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar" id="sidebar"></aside>
-  <div class="main">
-    <header class="topbar" id="topbar"></header>
-    <main class="content home-page">
-      <section class="chat-box">
-        <nav class="history" id="history" aria-label="Chat history"></nav>
-        <div class="chat-panel">
-          <div class="chat-head"><button class="btn hist-btn" data-hist aria-label="Chat history">☰</button><h2 id="chat-title">Chat</h2></div>
-          <div class="chat-body" id="chat-area"></div>
-        </div>
-      </section>
-    </main>
-  </div>
-</div>
-<div class="toast" id="toast" hidden></div>
+<form class="card" id="login" novalidate>
+  <div class="brand"><i></i>Flownt</div>
+  <h1>Log in</h1>
+  <label>Email<input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com"></label>
+  <label>Password<input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password"></label>
+  <span class="err" id="err" hidden></span>
+  <button class="btn primary" type="submit">Log in</button>
+</form>
 
-<script src="shell.js"></script>
 <script>
-const $ = (s) => document.querySelector(s);
-const esc = Shell.esc;
-const SUGGESTIONS = [
-  { title: "Create a mission", text: "Turn a goal into actionable work.", primary: true },
-  { title: "Create AI roles", text: "Build an AI teammate for a specific responsibility." },
-  { title: "Manage my team", text: "Organize people, AI roles, and ongoing work." },
-];
-const REPLY = "Placeholder reply from Flownt. This is where the answer to your message would appear.";
-const PROJECTS = [1, 2, 3].map((n) => ({ id: `project-${n}`, title: `Project name ${n}` }));
-const STARTER = [1, 2, 3].map((n) => ({ id: `chat-${n}`, title: `Chat title ${n}`, messages: [
-  { from: "me", text: "Message text goes here." }, { from: "ai", text: REPLY }] }));
-
-// New chats survive a trip to another page in the same tab; the page works without storage too.
-const KEY = "flownt-chats-v2";
-let chats;
-try { chats = JSON.parse(sessionStorage.getItem(KEY)); } catch { chats = null; }
-if (!Array.isArray(chats)) chats = STARTER;
-const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(chats)); } catch {} };
-const findChat = (k) => chats.find((c) => c.id === k);
-const findProject = (k) => PROJECTS.find((p) => p.id === k);
-const key = () => location.hash.slice(1);
-
-function renderHistory() {
-  const link = (item, box) => `<a href="#${item.id}" class="${key() === item.id ? "on" : ""}">${box ? "<i></i>" : ""}<span>${esc(item.title)}</span></a>`;
-  $("#history").innerHTML = `
-    <a href="#" class="btn new" data-new>+ New chat</a>
-    <div class="h-label">Projects</div>
-    ${PROJECTS.map((p) => link(p, true)).join("")}
-    <div class="h-label">Recent</div>
-    ${chats.slice(0, 8).map((c) => link(c, false)).join("")}`;
-}
-
-function composer(placeholder, docked) {
-  return `<div class="${docked ? "docked" : ""}"><form class="composer" id="composer">
-    <textarea id="msg" rows="${docked ? 1 : 2}" placeholder="${esc(placeholder)}" aria-label="Message"></textarea>
-    <button class="send" id="send" type="submit" aria-label="Send" disabled>↑</button>
-  </form></div>`;
-}
-
-/* Views: new chat (no hash), a project (#project-…), or a conversation (#chat-…) */
-function render() {
-  const chat = findChat(key()), project = findProject(key());
-  const area = $("#chat-area");
-  if (chat) {
-    document.title = `${chat.title} · Flownt`;
-    $("#chat-title").textContent = chat.title;
-    area.innerHTML = `<div class="chat convo">
-      <div class="thread">${chat.messages.map(bubble).join("")}</div>
-      ${composer("Reply to Flownt...", true)}</div>`;
-    area.scrollTop = area.scrollHeight;
-  } else if (project) {
-    document.title = `${project.title} · Flownt`;
-    $("#chat-title").textContent = project.title;
-    area.innerHTML = `<div class="chat"><p class="lede">Project description goes here.</p>
-      ${composer(`Message Flownt about ${project.title}...`)}
-      <div class="list"><h2>Chats in this project</h2>
-        ${[1, 2, 3].map((n) => `<a href="#" data-open-title="Chat title ${n}"><span>Chat title ${n}</span><span class="muted">Date</span></a>`).join("")}</div></div>`;
-  } else {
-    document.title = "Flownt Home";
-    $("#chat-title").textContent = "Chat";
-    area.innerHTML = `<div class="chat start">
-      ${composer("Message Flownt...")}
-      <div class="cards">${SUGGESTIONS.map((s, i) => `<button class="card ${s.primary ? "primary" : ""}" data-suggest="${i}"><b>${esc(s.title)}</b><span>${esc(s.text)}</span></button>`).join("")}</div></div>`;
-  }
-  renderHistory();
-  wire(chat, project);
-}
-
-const bubble = (m) => m.from === "me"
-  ? `<div class="msg mine">${esc(m.text)}</div>`
-  : `<div class="msg ai ${m.typing ? "typing" : ""}"><small>Flownt</small>${esc(m.text)}</div>`;
-
-function wire(chat, project) {
-  const form = $("#composer"), box = $("#msg"), send = $("#send");
-  box.addEventListener("input", () => {
-    send.disabled = !box.value.trim();
-    if (chat) { box.style.height = "auto"; box.style.height = box.scrollHeight + "px"; }
-  });
-  box.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = box.value.trim();
-    if (!text) return;
-    if (chat) reply(chat, text); else startChat(text);
-  });
-  if (!matchMedia("(max-width: 860px)").matches) box.focus();
-}
-
-function addChat(title, messages = []) {
-  const chat = { id: "chat-" + Date.now().toString(36), title, messages };
-  chats = [chat, ...chats]; save();
-  return chat;
-}
-
-function startChat(text) {
-  const chat = addChat(text.length > 34 ? text.slice(0, 32).trimEnd() + "…" : text);
-  location.hash = chat.id;
-  reply(chat, text);
-}
-
-function reply(chat, text) {
-  chat.messages.push({ from: "me", text }, { from: "ai", text: "Flownt is typing…", typing: true });
-  save(); render();
-  setTimeout(() => {
-    const last = chat.messages[chat.messages.length - 1];
-    last.text = REPLY; delete last.typing; save();
-    if (key() === chat.id) render();
-  }, 700);
-}
-
-document.addEventListener("click", (e) => {
-  const hist = $("#history");
-  if (e.target.closest("[data-hist]")) { hist.classList.toggle("open"); return; }
-  if (!e.target.closest("#history")) hist.classList.remove("open");
-  if (e.target.closest("#history a")) hist.classList.remove("open");
-
-  if (e.target.closest("[data-new]")) {
-    e.preventDefault();
-    history.replaceState(null, "", location.pathname);
-    render();
-  }
-  const s = e.target.closest("[data-suggest]");
-  if (s) {
-    const box = $("#msg"), item = SUGGESTIONS[+s.dataset.suggest];
-    box.value = `${item.title}: ${item.text}`;
-    $("#send").disabled = false;
-    box.focus();
-  }
-  const pc = e.target.closest("[data-open-title]");
-  if (pc) {
-    e.preventDefault();
-    location.hash = addChat(pc.dataset.openTitle, [{ from: "me", text: "Message text goes here." }, { from: "ai", text: REPLY }]).id;
-  }
+const form = document.getElementById("login"), err = document.getElementById("err");
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = form.email.value.trim(), password = form.password.value;
+  const show = (m) => { err.textContent = m; err.hidden = false; };
+  if (!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.");
+  if (!password) return show("Enter your password.");
+  location.href = "home.html";
 });
-
-window.addEventListener("hashchange", render);
-Shell.mount("home", { title: "Home" });
-render();
 </script>
 </body>
 </html>
